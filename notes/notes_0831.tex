@@ -1,0 +1,97 @@
+\documentclass[12pt]{article}
+\usepackage{amsmath}
+\usepackage{amsthm}
+\usepackage[hmargin=1in,vmargin=1in]{geometry}
+\usepackage[shortlabels]{enumitem}
+\usepackage{multicol}
+\usepackage{hyperref}
+\usepackage{graphicx}
+\usepackage[section]{placeins}
+\usepackage{amssymb}
+\usepackage{listings}
+\usepackage{amsmath,tkz-euclide}
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta, decorations.markings}
+\usetkzobj{all}
+\newtheorem{theorem}{Theorem}
+\newtheorem*{theorem*}{Theorem}
+%\usepackage{float}
+%\floatplacement{figure}{H}
+\newcounter{problem}
+\newcounter{solution}
+\graphicspath{{/Users/edwardmcdugald/MRIBackground/doc/figs/}}
+\DeclareMathOperator{\sech}{sech}
+
+\parindent 0in
+\parskip 1em
+\Urlmuskip=0mu plus 1mu
+
+\title{Convection Patterns - Notes from 0831}
+\author{Edward McDugald}
+
+
+\begin{document}
+\maketitle
+
+The following notes consist of my observations and impressions of the following paper:\newline
+\href{https://www.math.arizona.edu/~anewell/publications/Geometry_Phase_Diffusion_Eq.pdf}{The Geometry of the Phase Diffusion Equation}
+
+\section{Introduction}
+\hspace*{10mm} This paper concerns mathematical models of physical systems, which form patterns under certain circumstances.
+Apparently, pattern formation occurs when continuous translational symmetry breaks down. \textbf{I am not sure what this means in this context}. I understand translational symmetry to mean that I can take some pattern/shape/function, slide it in some direction, and the pattern/shape/function will be unchanged. I would call this translational invariance.
+A provided example is striped patterns occuring in 2D. The continuous symmetry is locally preserved in one direction, but reduces to discrete periodic symmetry in the perpendicular direction. Convection patterns in fluids and crystals and optical patterns in Maxwell-Bloch laser systems are some examples.\newline
+\hspace*{10mm} Defects are a "universal" feature of these systems. \textbf{What does universal mean, precisely?}. These are points where the regularity of the pattern breaks down. It seems both regular patterns ("planforms") and defects are considered universal. The goal of this paper is to identify and classify pattern defects occuring in systems with rotational symmetry.
+\textbf{What does rotational symmetry here mean?}. \newline
+\hspace*{10mm} Pattern formation literature is strongly motivated by \textbf{Rayleigh-Benard convection}. This type of convection can be seen experimentally by trapping a thin layer of fluid between two plates, and heating the bottom layer. \textbf{ToDo: Get some physical intuition about this process}. There is a parameter, $R$, which is proportional to the temperature difference between the bottom and top plates. For $R<R_c$, heat is conducted but the fluid does not move. When $R>R_c$, the fluid is set in motion, yielding "convection rolls".\newline
+\hspace*{10mm} The instability in convection was explained by Rayleigh using the \textbf{Boussinesq} approximation. This model consists of \textbf{Navier Stokes} for fluid velocity, coupled with a diffusion equation for temperature evolution. Near threshold ($\mathbf{R=R_c}$?), solutions of these equations have the form of almost straight parallel roll patterns. These equations can be modeled by traditional amplitude equations \textbf{(Does this explain the ansatz, $\mathbf{w=A(k^2)e^{i\vec{k}\cdot\vec{x}}}$ \textbf{)}}. When using these models, the amplitude and phase are active $\textbf{order parameters (what does this mean?)}$ when sufficiently close to threshold, these patterns display restricted types of defects, called \emph{dislocations} and \emph{amplitude grain boundaries}.\newline
+\hspace*{10mm} Far from threshold, these models admit a richer variety of defects. For example, one may observe a \emph{Convex Disclination}. \newline
+\hspace*{10mm} Mathematical models of pattern behavior far from threshold are equations derived for a \emph{phase order parameter} which locally organizes the pattern. \textbf{Does phase here refer to an angle, or a transition across a critical value?}. These equations are derived from solvability conditions associated with translational invariance (\textbf{Does translational invariance have the same meaning here as translational symmetry?}). This explores such a model, the "Cross-Newell phase diffusion equation". This paper shows that the level sets and singularities of weak solutions to CN agree the experimental and numerically observed patterns and their defects. The paper also considers a variational regularization of the CN, RCN. The energy of the minimizers of RCN tends asymptotically to the energy of weak solutions as the regularization is removed.\newline
+\hspace*{10mm} CN is challenging. It supports singular and multivalued (complex analysis context?) stationary solutions. A single valued weak solution may be obtained as a singular limit of solutions to RCN. \textbf{Understand meaning of weak solution}. \newline
+\hspace*{10mm} Paper layout. Section 2 consists of background for CN and its regularization. Section 3 consists of finding exact solutions of the stationary CN via Legendre transform. These solutions are multivalued, whose branch points represent "caustic" singularities \textbf{(what does caustic mean here?)}. Sections 4 and 5 deal with the RCN. In section 4, the ansatz of \textbf{self-dual} reduction (an equipartition assumption \textbf{(what is this?)}) is used to reduce the fourth-order RCN to a second-order equation called the self-dual equation. It is shown the solution of the self-dual equation is a solution of RCN provided the solution has zero Gaussian curvature \textbf{ToDo: Understand Gaussian Curvature}. The self-dual equations can be transformed into a \textbf{Helmholtz} equation, where the solutions are analyzed in the \textbf{vanishing viscosity limit}. Finally, section 5 uses that RCN is variational to analyze the minimizers of the associated free energy and their \textbf{viscosity limits}. \textbf{ToDo: Understand Helmholtz and viscosity}.
+
+\section{Background}
+\subsection{Formal Derivation of CN}
+\hspace*{10mm} RCN (regularized phase diffusion equation), is referred to as macroscopic- what does this mean? I think perhaps its refers to the continuum assumption? Considered valid in describing a variety of pattern forming systems, particularly those that are close to \emph{gradient systems}, such as the case of \emph{high Prandtl number convection}. \textbf{ToDo: understand meaning of gradient system and prandtl number}. Underlying governing equation is the \textbf{Swift-Hohenberg} equation,
+\begin{equation}
+    w_t = -(1+\Delta)^2w + Rw - w^3,
+\end{equation}
+which is a model for \textbf{Rayleigh-Benard convection at high Prandtl number}. The scalar variable $w: \mathbb{R}^2 \rightarrow \mathbb{R}$ represents the passively advected temperature scalar of the \emph{Boussinesq} equations. The pattern is given by the lecel lines $w = c_0$.
+Equation (1) can be expressed as $w_t = -\frac{\delta \mathcal{E}}{\delta w}$, with
+\begin{equation}
+    \mathcal{E} = \frac{1}{2}\int_{\Omega}\left(((1+\Delta)w)^2-Rw^2+\frac{1}{2}w^4\right)dxdy,
+\end{equation}
+where $\Omega$ is a region in the plane. 
+Equation (1) admits a family of stationary "straight roll" solutions $w_0 = f(\theta)$ where $f$ is an even, $2\pi$ periodic function of $\theta$.
+\begin{equation}
+    w_0 = a_1(k)\cos(\theta)+a_2(k)\cos(2\theta)+\dots+a_n(k)\cos(n\theta)+\dots,
+\end{equation}
+with $\theta = \vec{k}\cdot\vec{x}$ and $k=|\vec{k}|$. Recursions formulae for the $a_n$ can be found here: \href{https://ebookcentral.proquest.com/lib/uaz/reader.action?docID=3031012}{Instabilities and Fronts in Extended Systems}. \newline
+\hspace*{10mm} \textbf{Let's justify some of the above statements:} we have
+\begin{align*}
+    \mathcal{E} &= \int_{\Omega}L(w)dxdy\\
+    L(w) &= \frac{1}{2}\left( ((1+\Delta)w)^2-Rw^2+\frac{1}{2}w^4 \right).
+\end{align*}
+\textbf{Claim (needs to be cleaned up and verified):} $\frac{\delta \mathcal{E}}{\delta w} = \frac{dL(w)}{dw}$
+Note that
+\begin{align*}
+    L(w) &= \frac{1}{2}\left[ (1+\Delta)^2 w^2 -Rw^2 + \frac{1}{2}w^4\right]\\
+    \implies \frac{dL(w)}{dw} &= \frac{1}{2}\left[ 2(1+\Delta)^2 2w -2Rw +2w^3 \right]\\
+                              &= (1+\Delta)^2w -Rw + w^3\\
+                              &= -w_t.
+\end{align*}
+But this logic seems very suspect... \textbf{ToDo: Review the definition of variational derivative. Work out the variational derivative from first principles.} \textbf{ToDo: Verify that the Ansatz of Equation (3) is consistent with the SH equation} \textbf{ToDo: Understand the meaning of Stationary Solution in the context of PDE}\newline
+\hspace*{10mm} For equations such as (1), a general description of the stable stationary solutions beyond a fixed "planform" does not exist. One can appeal to an asymptotic method, modulation theory, to describe patterns that are localy of the form of stationary straight roll solutions, but vary slowly over large distances. One thinks of the small parameter $\epsilon$ as being, in this context, the inverse of the aspect ratio (the ratio of the plate separation to the diameter of the aparatus.) When defects are present, the definition of $\epsilon$ needs to be the inverse of the mean distance between defects. For SH, this means there are many $O(\epsilon^{-1})$ rolls in the region $\Omega$ with sparse defects. One also wants these solutions to look locally like the straight roll solutions, (3). \textbf{Translation to English: I believe what is being conveyed here is that the results of simulations of SH are not fully understood. In particular, certain defects present in the simulations are not generally observable from the known solutions of SH. Therefore, this discussion is leading to some ideas of simplified models that capture the observed patterns from SH simulations?}. Therefore, we seek solutions of the form $w = w^{\epsilon}(\Theta / \epsilon)$ whose argument depends only on the macroscopic or "slow scale" $(\vec{X},T)=(\epsilon \vec{x},\epsilon^2t)$; i.e. $\Theta = \Theta(\vec{X},T)$. The microscopic or "fast" scale of the solution is expressed through the periodic function $w^{\epsilon}$ being scaled by $1/\epsilon$. An important idea here is that $w$ should, locally in space and time, look like a stationary solution (3), but only approximately. The modulation \textbf{What does modulation mean here?} is represented as a slow variation of wavevector $\vec{k}$ \textbf{Is the wave vector a vector of frequencies?} which parameterizes the family (3). Thus, one thinks of $w^{\epsilon}(\Theta / \epsilon)$ as having the form of (3), but with $\Theta$ and the Fourier coefficients $a_n(k)$ modulated. While on the local scale $\vec{k}$ is constant, on the macroscopic scale it varies: $\vec{k}=\vec{k}(\vec{X},T)$. \newline
+\hspace*{10mm} This is a good place to stop...
+\section{Ideas for Fall 22 Research}
+\begin{enumerate}[(a)]
+    \item Use a machine learning approach to find a new model that agrees with the SH simulations
+    \item In parallel, strive to understand the derivations in the above paper
+\end{enumerate}
+
+
+
+
+
+
+\end{document}
+
