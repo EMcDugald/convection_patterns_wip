@@ -1,0 +1,263 @@
+\documentclass[12pt]{article}
+\usepackage{amsmath}
+\usepackage{amsthm}
+\usepackage[hmargin=1in,vmargin=1in]{geometry}
+\usepackage[shortlabels]{enumitem}
+\usepackage{multicol}
+\usepackage{hyperref}
+\usepackage{graphicx}
+\usepackage[section]{placeins}
+\usepackage{amssymb}
+\usepackage{listings}
+\usepackage{amsmath,tkz-euclide}
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta, decorations.markings}
+\usetkzobj{all}
+\newtheorem{theorem}{Theorem}
+\newtheorem*{theorem*}{Theorem}
+%\usepackage{float}
+%\floatplacement{figure}{H}
+\newcounter{problem}
+\newcounter{solution}
+\graphicspath{{/Users/edwardmcdugald/Research/convection_patterns/figs/}}
+\usepackage{chngcntr}
+\counterwithin*{section}{part}
+
+\parindent 0in
+\parskip 1em
+\Urlmuskip=0mu plus 1mu
+
+\title{Convection Patterns - Initial Impressions (Feeling out the Problem)}
+\author{Edward McDugald}
+
+
+\begin{document}
+\maketitle
+
+
+\part{8/31}
+The following notes consist of my observations and impressions of the following paper:\newline
+\href{https://www.math.arizona.edu/~anewell/publications/Geometry_Phase_Diffusion_Eq.pdf}{The Geometry of the Phase Diffusion Equation}
+\section{Introduction}
+\hspace*{10mm} This paper concerns mathematical models of physical systems, which form patterns under certain circumstances.
+Apparently, pattern formation occurs when continuous translational symmetry breaks down. \textbf{I am not sure what this means in this context}. I understand translational symmetry to mean that I can take some pattern/shape/function, slide it in some direction, and the pattern/shape/function will be unchanged. I would call this translational invariance.
+A provided example is striped patterns occuring in 2D. The continuous symmetry is locally preserved in one direction, but reduces to discrete periodic symmetry in the perpendicular direction. Convection patterns in fluids and crystals and optical patterns in Maxwell-Bloch laser systems are some examples.\newline
+\hspace*{10mm} Defects are a "universal" feature of these systems. \textbf{What does universal mean, precisely?}. These are points where the regularity of the pattern breaks down. It seems both regular patterns ("planforms") and defects are considered universal. The goal of this paper is to identify and classify pattern defects occuring in systems with rotational symmetry.
+\textbf{What does rotational symmetry here mean?}. \newline
+\hspace*{10mm} Pattern formation literature is strongly motivated by \textbf{Rayleigh-Benard convection}. This type of convection can be seen experimentally by trapping a thin layer of fluid between two plates, and heating the bottom layer. \textbf{ToDo: Get some physical intuition about this process}. There is a parameter, $R$, which is proportional to the temperature difference between the bottom and top plates. For $R<R_c$, heat is conducted but the fluid does not move. When $R>R_c$, the fluid is set in motion, yielding "convection rolls".\newline
+\hspace*{10mm} The instability in convection was explained by Rayleigh using the \textbf{Boussinesq} approximation. This model consists of \textbf{Navier Stokes} for fluid velocity, coupled with a diffusion equation for temperature evolution. Near threshold ($\mathbf{R=R_c}$?), solutions of these equations have the form of almost straight parallel roll patterns. These equations can be modeled by traditional amplitude equations \textbf{(Does this explain the ansatz, $\mathbf{w=A(k^2)e^{i\vec{k}\cdot\vec{x}}}$ \textbf{)}}. When using these models, the amplitude and phase are active $\textbf{order parameters (what does this mean?)}$ when sufficiently close to threshold, these patterns display restricted types of defects, called \emph{dislocations} and \emph{amplitude grain boundaries}.\newline
+\hspace*{10mm} Far from threshold, these models admit a richer variety of defects. For example, one may observe a \emph{Convex Disclination}. \newline
+\hspace*{10mm} Mathematical models of pattern behavior far from threshold are equations derived for a \emph{phase order parameter} which locally organizes the pattern. \textbf{Does phase here refer to an angle, or a transition across a critical value?}. These equations are derived from solvability conditions associated with translational invariance (\textbf{Does translational invariance have the same meaning here as translational symmetry?}). This explores such a model, the "Cross-Newell phase diffusion equation". This paper shows that the level sets and singularities of weak solutions to CN agree the experimental and numerically observed patterns and their defects. The paper also considers a variational regularization of the CN, RCN. The energy of the minimizers of RCN tends asymptotically to the energy of weak solutions as the regularization is removed.\newline
+\hspace*{10mm} CN is challenging. It supports singular and multivalued (complex analysis context?) stationary solutions. A single valued weak solution may be obtained as a singular limit of solutions to RCN. \textbf{Understand meaning of weak solution}. \newline
+\hspace*{10mm} Paper layout. Section 2 consists of background for CN and its regularization. Section 3 consists of finding exact solutions of the stationary CN via Legendre transform. These solutions are multivalued, whose branch points represent "caustic" singularities \textbf{(what does caustic mean here?)}. Sections 4 and 5 deal with the RCN. In section 4, the ansatz of \textbf{self-dual} reduction (an equipartition assumption \textbf{(what is this?)}) is used to reduce the fourth-order RCN to a second-order equation called the self-dual equation. It is shown the solution of the self-dual equation is a solution of RCN provided the solution has zero Gaussian curvature \textbf{ToDo: Understand Gaussian Curvature}. The self-dual equations can be transformed into a \textbf{Helmholtz} equation, where the solutions are analyzed in the \textbf{vanishing viscosity limit}. Finally, section 5 uses that RCN is variational to analyze the minimizers of the associated free energy and their \textbf{viscosity limits}. \textbf{ToDo: Understand Helmholtz and viscosity}.
+
+\section{Background}
+\subsection{Formal Derivation of CN}
+\hspace*{10mm} RCN (regularized phase diffusion equation), is referred to as macroscopic- what does this mean? I think perhaps its refers to the continuum assumption? Considered valid in describing a variety of pattern forming systems, particularly those that are close to \emph{gradient systems}, such as the case of \emph{high Prandtl number convection}. \textbf{ToDo: understand meaning of gradient system and prandtl number}. Underlying governing equation is the \textbf{Swift-Hohenberg} equation,
+\begin{equation}
+    w_t = -(1+\Delta)^2w + Rw - w^3,
+\end{equation}
+which is a model for \textbf{Rayleigh-Benard convection at high Prandtl number}. The scalar variable $w: \mathbb{R}^2 \rightarrow \mathbb{R}$ represents the passively advected temperature scalar of the \emph{Boussinesq} equations. The pattern is given by the lecel lines $w = c_0$.
+Equation (1) can be expressed as $w_t = -\frac{\delta \mathcal{E}}{\delta w}$, with
+\begin{equation}
+    \mathcal{E} = \frac{1}{2}\int_{\Omega}\left(((1+\Delta)w)^2-Rw^2+\frac{1}{2}w^4\right)dxdy,
+\end{equation}
+where $\Omega$ is a region in the plane. 
+Equation (1) admits a family of stationary "straight roll" solutions $w_0 = f(\theta)$ where $f$ is an even, $2\pi$ periodic function of $\theta$.
+\begin{equation}
+    w_0 = a_1(k)\cos(\theta)+a_2(k)\cos(2\theta)+\dots+a_n(k)\cos(n\theta)+\dots,
+\end{equation}
+with $\theta = \vec{k}\cdot\vec{x}$ and $k=|\vec{k}|$. Recursions formulae for the $a_n$ can be found here: \href{https://ebookcentral.proquest.com/lib/uaz/reader.action?docID=3031012}{Instabilities and Fronts in Extended Systems}. \newline
+\hspace*{10mm} \textbf{Let's justify some of the above statements:} we have
+\begin{align*}
+    \mathcal{E} &= \int_{\Omega}L(w)dxdy\\
+    L(w) &= \frac{1}{2}\left( ((1+\Delta)w)^2-Rw^2+\frac{1}{2}w^4 \right).
+\end{align*}
+\textbf{Claim (needs to be cleaned up and verified):} $\frac{\delta \mathcal{E}}{\delta w} = \frac{dL(w)}{dw}$
+Note that
+\begin{align*}
+    L(w) &= \frac{1}{2}\left[ (1+\Delta)^2 w^2 -Rw^2 + \frac{1}{2}w^4\right]\\
+    \implies \frac{dL(w)}{dw} &= \frac{1}{2}\left[ 2(1+\Delta)^2 2w -2Rw +2w^3 \right]\\
+                              &= (1+\Delta)^2w -Rw + w^3\\
+                              &= -w_t.
+\end{align*}
+But this logic seems very suspect... \textbf{ToDo: Review the definition of variational derivative. Work out the variational derivative from first principles.} \textbf{ToDo: Verify that the Ansatz of Equation (3) is consistent with the SH equation} \textbf{ToDo: Understand the meaning of Stationary Solution in the context of PDE}\newline
+\hspace*{10mm} For equations such as (1), a general description of the stable stationary solutions beyond a fixed "planform" does not exist. One can appeal to an asymptotic method, modulation theory, to describe patterns that are localy of the form of stationary straight roll solutions, but vary slowly over large distances. One thinks of the small parameter $\epsilon$ as being, in this context, the inverse of the aspect ratio (the ratio of the plate separation to the diameter of the aparatus.) When defects are present, the definition of $\epsilon$ needs to be the inverse of the mean distance between defects. For SH, this means there are many $O(\epsilon^{-1})$ rolls in the region $\Omega$ with sparse defects. One also wants these solutions to look locally like the straight roll solutions, (3). \textbf{Translation to English: I believe what is being conveyed here is that the results of simulations of SH are not fully understood. In particular, certain defects present in the simulations are not generally observable from the known solutions of SH. Therefore, this discussion is leading to some ideas of simplified models that capture the observed patterns from SH simulations?}. Therefore, we seek solutions of the form $w = w^{\epsilon}(\Theta / \epsilon)$ whose argument depends only on the macroscopic or "slow scale" $(\vec{X},T)=(\epsilon \vec{x},\epsilon^2t)$; i.e. $\Theta = \Theta(\vec{X},T)$. The microscopic or "fast" scale of the solution is expressed through the periodic function $w^{\epsilon}$ being scaled by $1/\epsilon$. An important idea here is that $w$ should, locally in space and time, look like a stationary solution (3), but only approximately. The modulation \textbf{What does modulation mean here?} is represented as a slow variation of wavevector $\vec{k}$ \textbf{Is the wave vector a vector of frequencies?} which parameterizes the family (3). Thus, one thinks of $w^{\epsilon}(\Theta / \epsilon)$ as having the form of (3), but with $\Theta$ and the Fourier coefficients $a_n(k)$ modulated. While on the local scale $\vec{k}$ is constant, on the macroscopic scale it varies: $\vec{k}=\vec{k}(\vec{X},T)$. \newline
+\hspace*{10mm} This is a good place to stop...
+
+\part{9/04}
+The following notes consist of my observations and impressions of the following paper:\newline
+\href{https://reader.elsevier.com/reader/sd/pii/0167278996000735?token=1E05B69B5C19BB211B4882EB251E155B3A04AA66D17F830BB16530DC7A311404B4C9D2EE26695BF54D943B0271323C0E&originRegion=us-east-1&originCreation=20220904031131}{Defects are weak and self-dual solutions of the Cross-Newell phase diffusion equation for natural patterns}
+\section{Introduction}
+\subsection{General Discussion}
+\begin{enumerate}[(i)]
+    \item What is the phase parameter? Are it's level curves in time step functions?
+    \item What is meant by the magnitude of the wave vector? Are they referring to $L_2$ norm? I will accept that the wave vector is defined in such a way that its length is the spatial angular frequency of the convection roll, $k=\frac{2\pi}{\lambda}$.
+   \item What do the constant phase contours look like?
+    \item In the notation $k(f,g)=\nabla \theta$, what are $f$ and $g$?
+\item $\epsilon = \frac{\lambda}{l}$, $\lambda$ is wavelength, and $l$ is average distance between defects? $\epsilon$ is called inverse aspect ratio. Note that if each roll is a circle, the height of the container equals the diameter of the circle.
+\item What does it mean for $\nabla f$, $\nabla g$ to be of the order $\epsilon \lambda^{-2}$? I think it implies $f$ and $g$ vary slowly.
+\item \textbf{Big Idea:} The equation that describes the behavior of the macroscopic order parameter $k$ in regions where it varies slowly also captures its behavior in regions where it is singular. Does singular imply defect?
+\item Could also consider an amplitude order parameter $A$. In regions where $\vec{k}$ varies slowly, $A$ is algebraicly slaved to the wave vector. As long as $k$ remains withing a certain band, $A$ remains slaved. But if $k$ is outside this band, $A$ becomes an active order parameter, with its own differential equation. This can occur at the cores of dislocations. 
+\item Another order parameter may be the mean flow, manifested in convection patterns as large patches of positive and negative vorticity. (vorticity=local spinning motion). This can have a drastic effect on the pattern formation. Sensitive to small Prandtl number?
+\item Large scale vertical vorticity, $\Omega$, (generated by "pondermotive" action) is proportional to 
+    \[
+        \gamma \vec{k}\times\nabla(\nabla \cdot \vec{k}A^2(k)),
+    \] 
+    an is maximum (minimum) when the pattern wave vector and the gradient of roll curvature are pependicular (parallel).
+\item The (divergence free) velocity field $\vec{U}$ corresponding to $\Omega(\vec{U}=\nabla\times\psi \vec{z}, \Omega=-\nabla^2\psi)$ acts on the constant phase contours by advection, $\theta_t \rightarrow \theta_t + \vec{U}\cdot\vec{k}$. In the infinite Prandtl number limit, $\gamma \rightarrow 0$, the pattern evolves according more or less to a gradient flow. In these cases, and as long as the amplitude remains slaved, the phase is governed by a phase dynamics with macroscopic free energy,
+    \[
+        F = \int \left( \frac{1}{2}(\nabla \cdot \vec{k})^2+\frac{1}{2}G^2(k^2) \right)dxdy,
+    \] 
+    where $G^2$ is nonzero when the local wavenumber $k$ is different from some optimal value $k_B$ and $\nabla \cdot \vec{k}$ is the roll curvature. In these cases, the "cost" of a pattern is contained in a combination of the wave number mismatch (measured by $G^2$) and roll bending (as measured by $(\nabla \cdot\vec{k})^2$).
+\item Important parameters:
+    \begin{enumerate}[(a)]
+        \item $R/R_c$: the ratio of the temperature difference across the cell to the convection onset value
+        \item $\gamma^{-1}$, the Prandtl number (ratio of momentum diffusivity (kinematic viscosity) to thermal diffusivity).
+        \item $\epsilon^{-1}$: aspect ratio, $\frac{l}{\lambda}$.
+    \end{enumerate}
+\item \textbf{5 main pattern types}.
+    \begin{enumerate}[(a)]
+        \item Straight parallel rolls with line defects corresponding to \emph{amplitude grain boundaries}. These are arrays of dislocations along curves at which two patches of rolls with different orientations meet. Caused by amplitude order parameter (unconstrained by wave number slaving), makes a transition from $0$ to some value depending on the wave number in the interior. Occurs over large range of Prandtl numbers, and $R/R_c$ close to $1$.
+        \item Roll patches with line defects corresponding to \emph{phase grain boundaries}. These are lines separating two sets of almost straight parallel rolls across which the phase is continuous but its gradient changes abruptly. The phase grain boundaries meet at point defects called concave convex disclinations. This occurs for larger Prandtl numbers ($>10$) and large aspect ratios, over a large range of $R/R_C$.
+        \item Targets, nucleated by formation of bridges near dislocations, spontaneously grow due to phase production at their active centers. Occur for large values of $R/R_c$ ($>5$) and for Prandtl numbers of about $>3$, depending on aspect ratio.
+        \item Spirals. 
+        \item Hexagons.
+    \end{enumerate}
+\item Main focus is the second set of behaviors. 
+\end{enumerate}
+\subsection{Discussion of New Ideas}
+Goal is to show that the topological and energetic structures of defects are well described by the Cross-Newell phase diffusion equation for the macroscopic order parameter $\vec{k}=\nabla \theta$.
+    The Cross-Newell equation reads:
+    \[
+        \tau(k)\theta_t + \nabla \cdot \vec{k}B(k) + \eta \nabla^4 \theta = 0.
+    \] 
+    This is a gradient flow and corresponds to
+     \[
+        F = \int \left( \frac{1}{2}(\nabla \cdot \vec{k})^2 + \frac{1}{2}G^2(k^2) \right)dxdy.
+    \] 
+    with
+    \begin{align*}
+        G^2 &= -\frac{1}{\eta}\int_{k_B^2}^{k^2}Bdk^2\\
+        \eta &= \frac{1}{4k_B}\lvert \frac{dB(k_B)}{dk}\rvert,
+    \end{align*}
+    and can be written
+    \[
+        \eta^{-1}\tau(k)\theta_t = -\frac{\delta F}{\delta \theta}.
+    \]
+    Note: The Cross-Newell equation is derived assuming a slowly varying wave vector and therefore the behavior of the phase is governed by the middle term, $\nabla \cdot \vec{k}B(k)$ (What is $B(k)$?).
+    However, $\nabla \cdot \vec{k}B$, when written as a quailinear second order spatial derivative operator on $\theta$, is only elliptic negative in $k_B , k , k_E$ and is hyperbolic for both $k_{El}<k<K_B$ and $k_e<K<K_r$. Since the wave number of natural convective patterns at high Prandtl numbers lies mainly in $k_{El}<k<k_B$, the Cross-Newell equation without the biharmonic term is ill-posed. The biharmonic term provides regularization. It regularizes the shock lines that the stationary, unregularized phase diffusion equation,
+    \[
+        \nabla \cdot \vec{k}B(k)=0, \quad \nabla \times \vec{k}=0,
+    \] 
+    can sustain. Their weak (shock) solutions are phase grain boundaries. \newline
+\hspace*{10mm} Phase grain boundaries intersect at or join concave and convex disclinations. These are the building blocks of all point defects. 
+
+\begin{figure}[ht]
+        \centering
+        \includegraphics[scale=.7]{KB.png}
+        \label{fig:1}
+    \end{figure}
+
+   \begin{figure}[ht]
+        \centering
+        \includegraphics[scale=.7]{concave_disc.png}
+        \caption{Concave Disclination}
+        \label{fig:2}
+    \end{figure}
+
+     \begin{figure}[ht]
+        \centering
+        \includegraphics[scale=.7]{convex_disc.png}
+        \caption{Convex Disclination}
+        \label{fig:3}
+    \end{figure}
+
+\begin{enumerate}[(i)]
+    \item The shapes of convex ($V$) and concave ($X$) disclinations satisfy topological and energetic constraints.
+    \item The local wave vector field $\vec{k}$ is only a wave vector field on the \emph{double cover} of the plane. \textbf{what is this?}
+    \item It is a \emph{director} field on the plane \textbf{what is this?}.
+    \item There is a topological invariant associated with these objects called \emph{twist}, $T$, aka the \emph{winding} number of the map
+        \[
+            \vec{x}(x=r\cos\alpha,y=r\sin\alpha)\rightarrow \vec{k}(f=k\cos{\varphi},g=k\sin\varphi)
+        \]
+    \textbf{what is this mapping?}
+\item The winding number is the angular amount through which the director turns as its midpoint circumscribes the singular point $0$ in a counter clockwise direction. $T(V)=-\pi$; $T(X)=\pi$. Alternatively, it is given be $T = \frac{1}{2}\int_C d\varphi$, where $C$ is a circumscribing contour on the double cover over which $\vec{k}$ is a vector field. \textbf{Is T the same for any circumscribing contour C?}.
+\item The Jacobian of the map ($x \rightarrow k$),
+    \[
+        J = f_xg_y-f_yg_x=\theta_{xx}\theta_{yy}-\theta_{xy}^2 = \frac{k}{r}(k_r\varphi_{\alpha}-\varphi_{r}k_{\alpha}),
+    \] 
+    which is proportional to the Gaussian curvature of the phase surface $\theta(x,y)$, is a very important object. It is related to twist by
+    \[
+        2J = \nabla \cdot k^2\vec{P}, \quad \vec{P} = (\varphi_y, -\varphi_x).
+    \] 
+\item If $\Omega$ is a domain on which the wave vector and its derivatives are smooth, and $C$ is a counterclockwise circumscribing contour,
+    \[
+        2\int_{\Omega}J(x,y)dxdy = \int_{C}k^2d\varphi,
+    \] 
+    where $C$ circles the perimeter of $\Omega$ and surrounds singularities of $J$ (if any) in the interior of $\Omega$. If $k=1$ on the boundary $C$, then $\int Jdxdy = T$.
+\item It satisfies a conservation law (in the case $\tau(k)=1$; $\tau(k)$ varies very slowly in $k$, and can be approximated by a constant.),
+    \[
+        \frac{\partial J}{\partial t}+\nabla \cdot \vec{k} = 0
+    \] 
+    with flux
+    \[
+        K = (Q_xg_y-Q_yg_x,-Q_xf_y+Q_yf_x), \quad Q=(fB)_x + (gB)_y + \eta\nabla^4\theta.
+    \] 
+    (recall that flux describes the flow of something through a surface).
+\item Defect configurations that minimize the free energy
+    \[
+        F = \int \left( \frac{1}{2}(\nabla \cdot \vec{k})^2 + \frac{1}{2}G^2(k^2) \right)dxdy
+    \] 
+    must have $k=k_B$ everywhere except at lines and points, the same configurations have zero $J$ everywhere except at points.
+\item These defect configurations are phase grain boundaries for which $J$ is identically zero. They are targets for which the phase surface $\theta(x,y)$ is approximately a cone, $k_B\sqrt{x^2+y^2}$. The Gaussian curvature for the cone is zero except at the apex $r=\sqrt{x^2+y^2}=0$. We shall see that $J=(\frac{\pi}{r})\cdot \delta(r)$ for a target. \textbf{what exactly is meant by a target?}.
+\item Concave disclinations and saddles are made up by a superposition of straight parallel rolls and phase grain boundaries so they have $J=0$ everywhere except at their cores, where $J$ is like a delta function.
+\item The constant phase contours of convex disclinations are the superposition of straight lines and circles. Again $J$ is zero except at the core. 
+\item Moreover, even when the presence of a nearby concave disclination changes the circular phase contours of the minimum energy configuration of the convex disclination into straight lines, the resulting phase surface still has Gaussian curvature. \textbf{can convex and concave disclinations coexist within the ellipse?}. In short, the graph of the phase surface will be polygonal in nature, with faces ($J=0$), edges (phase grain boundaries at which $J=0, k<k_B$), and verties (at which support of $J$ resides).
+\item One has to keep in mind that the global definition of $\theta(x,y)$ requires several covers of the plane, each joined to a neighbor along an edge which is not a phase grain boundary, but an \emph{pbstacle} (described later).
+\item For all practical purposes,
+    \[
+        2\int_{\Omega}J(x,y)dxdy = \int_{C}k^2d\varphi
+    \] 
+    is equivalent to the \emph{Gauss-Bonnet Theorem}.
+\item It is also useful to compare systems with free energy,
+    \[
+    F = \int \left( \frac{1}{2}(\nabla \cdot \vec{k})^2 + \frac{1}{2}G^2(k^2) \right)dxdy,
+    \] 
+    with those governed by harmonic fields.
+Suppose that the free energy of the system were
+\[
+    F = \int_{\Omega}\frac{1}{2}(\nabla\theta)^2dxdy
+\] 
+so that stationary solutions of the phase satisfy Laplace's equation, $\nabla^2\theta = 0$ and the complex field $w=f-ig=w(x=x+iy)$, with $\vec{k}=(f,g)$ and $\vec{x}=(x,y)$ is an analytic function of $z$ on the plane or some covering of it. The singularities (zeros and poles) of harmonic vector fields are $az$ (saddle) and $az^{-1}$. For each of these singularities, both twist $T$ and circulation $\Gamma=\int_x\vec{k}\cdot d\vec{x}$ can be defined. 
+\item The elementary director field singularities are $z^{1/2}(V)$ and $z^{-1/2}(X)$. We note that for these fields, circulation is not defined in the plane, $T(V)=-\pi$ amd $T(X)=\pi$, $J$ is $-\frac{1}{4}r^{-1}$ and $-\frac{1}{4}r^{-3}$ respectively and is distributed rather than concentrated at the core. Moreover, the wave number is broad, zero to infinity.
+\item But our free energy is $F = \int \left( \frac{1}{2}(\nabla \cdot \vec{k})^2 + \frac{1}{2}G^2(k^2) \right)dxdy$ not $F = \int_{\Omega}\frac{1}{2}(\nabla\theta)^2dxdy$, and its integrand puts major constraints on wave number not satisfied by harmonic disclinations. 
+\item The first result of this paper is that both concave and convex disclinations are indeed solutions of the stationary phase diffusion equation and that these solutions are excellent approximations of the convex and concave disclinations computed directly from microscopic models or seen in experiments. 
+\item The second result of this paper exploits the geometrical fact that near defects, the Gaussian curvature of the phase surface $\theta(x,y)$ is almost everywhere zero, and $J$ is a function concentrated at the defect core. Since in the bulk of the medium regularization is not required, we expect that $k=k_B$ except either at the defect core or along the phase grain boundaries emanating from it. In regions $\Omega$ containing phase grain boundaries, but no point defects, both wave number mismatch (\textbf{what is this?}) and roll bending contribute to the free energy. The surprising fact is that since $J=0$ in $\Omega$, they contribute equally. Solutions of the reduced equation,
+    \[
+    \nabla^2\theta = sG, \quad s=\pm 1,
+    \] 
+    which have $J=0$ also satisfy the phase diffusion equation
+    \[
+        \frac{\partial F}{\partial \theta} = \nabla^4 \theta - \nabla_xG \nabla_kG = \nabla^4\theta + \frac{1}{\eta}\nabla \cdot \vec{k}B=0.
+    \] 
+    If $\Omega$ includes point defects, a correction $\chi$ must be added to account for the fact $J$ has a nonzero concentration at these points. In general, we therefore write
+    \[
+    \nabla^2\theta = sG + s\chi,
+    \]
+    where
+    \[
+    \nabla^2\chi + \nabla_s \chi \nabla_k G = J\nabla_k^2 G.
+    \] 
+    We call $\nabla^2\theta = sG, \quad s=\pm 1$ the self ($s=1$) or antiself ($s=-1$) dual reduction. It has a further advantage. Since $k$ is close to $k_B$ almost everywhere, we can approximate $G^2$ by $(k_B^2-k^2)^2$ so that $\nabla^2\theta = sG, \quad s=\pm 1$ becomes $\nabla^2\theta = s(k_B^2-k^2)$. Further, using $\theta = s\ln\psi$, we obtain
+    \[
+    \nabla^2\psi - k_B^2\psi = 0.
+    \] 
+    If $\Omega$ contains point defects, we add an additional term $-k_B^2\chi \psi$.
+\end{enumerate}
+\section{Analysis}
+
+
+
+\end{document}
+
