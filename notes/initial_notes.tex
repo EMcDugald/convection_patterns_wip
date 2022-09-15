@@ -256,8 +256,42 @@ so that stationary solutions of the phase satisfy Laplace's equation, $\nabla^2\
     If $\Omega$ contains point defects, we add an additional term $-k_B^2\chi \psi$.
 \end{enumerate}
 \section{Analysis}
-
-
+\subsection{The phase diffusion equation}
+\hspace*{10mm} Start with a given set of governing equations for some microscopic variables which posses the $2\pi$ periodic soltion $f(\theta)$,
+\begin{equation}
+    w(\vec{x},s,t)=f(\theta=\vec{k}\cdot\vec{x},s;A(k),R) = \sum_n A_n(k)\cos n \theta.
+\end{equation}
+$\vec{x}$ represents the coordinates of infinite extent $(x,y)$; $s$ represents the coordinates of finite extent, $z$; $A(k)$ is an amplitude measure, which because we assume rotational invariance with respect to the variables of infinite extent, is a function only of $k=\lvert \vec{k} \rvert$; $R$ represents the stress parameters, $R/R_c, P_r, \varepsilon$. We assume (4) exists for some region in $k,R$ space and that it is linearly stable for an included region may be smaller. We assume that the governing equations has no neutral or soft modes. We now seek solutions of the original governing equations which are modulations of (4),
+\begin{equation}
+    w(x,s,t)=f\left( \theta=\frac{1}{\varepsilon}\Theta(\vec{x}=\varepsilon \vec{x},T=\varepsilon^2 t)=\int \vec{k(\vec{X})}\cdot d\vec{x},s;A(k),R \right)+\varepsilon w_1 \dots,
+\end{equation} 
+where $\varepsilon = \frac{\lambda}{l}, 0 < \varepsilon << 1$, is the inverse aspect ration. Because $f$ is no longer an exact solution, corrections $\{w_j\}_j$ must be calculated by a perturbation procedure in which each corrections satisfies a linear nonhomogeneous equation $Lw_j = g_j, j=1,2,\dots$, where $g_j$ consists of terms arising from the variation of $\vec{k}$ in $\vec{X}$ and $T$.\newline
+\hspace*{10mm} Translational invarianve in $f$ means that $L$, the operator obtained by linearizing the original equation about the periodic solution $f$, has a non-trivial nullspace $\frac{\partial f}{\partial \theta}$ and therefore the $g_j$ are subject to solvability conditions. These conditions, applied at order $\varepsilon^2, \varepsilon^4$ lead to the phase diffusion equation,
+\[
+    \tau(k)\Theta_T + \nabla_{\vec{X}}\vec{k}B(k) + \varepsilon^2 \eta \nabla_{\vec{X}}^4\Theta + \dots = 0,
+\] 
+where $\vec{k}=\nabla_{\vec{x}}\theta = \nabla_{\vec{X}}\Theta, \tau(k)>0, kB(k)$ has the graph shown above, and $\eta=(4k_B)^{-1}\lvert B'(k_B) \rvert$.
+The phase diffusion equation can also be written as
+\begin{align*}
+    \eta^{-1}\tau(k)\Theta_T &= -\frac{\partial F}{\partial \Theta}\\
+    F &= \int \left( \frac{1}{2}\varepsilon^2(\nabla^2\Theta)^2+\frac{1}{2}G^2\right)dXdY
+\end{align*}
+with $G^2=-\eta^{-1}\int_{k_B^2}^{k^2}Bdk^2$. \newline
+The macroscopic free energy contains two contributions, one representing a mismatch between the local wave number and some optimal value $k_B$ and the other representing the elastic bending energy due to roll curvature.
+\hspace*{10mm} Given adherence to some general properties, such as being a divergence, the exact form of the regularization is not important for the notion of weak solution. However, for a wide class of microscopic problems, the biharmonic is a very good approximation to the actual terms calculated through the solvability condition, and its precise structure is crucial in enabling us to exploit the localization of the Gaussian curvature of the phase surface. Its role is to control the instabilities and ill-posed nature of $\tau(k)\Theta_T + \nabla \cdot \vec{k}B=0$ for values of $k$ outside the Busse balloon. In general, amplitude regularization will be required for $k>k_E$. For all objects discussed here, $k_{El}<k<k_E$ except at points and the biharmonic is sufficient to provide regularization in this range. \newline
+\hspace*{10mm} There are some important properties of teh stationary unregularized phase diffusion equation
+\[
+    \nabla \cdot \vec{k}B(k), \quad \nabla \times \vec{k} = 0.
+\] 
+\begin{enumerate}[(i)]
+    \item In the hyperbolic region $k_{El}<k<k_B$, the unregularized stationary phase diffusion equation is isomorphic to the equations of compressible gas flow and shallow water theory. The analytic solutions are in general multivalued. They are replaced by weak solutions, the limit of the effect of regularization. These weak solutions contain shocks. The jump conditions for these shocks can be obtained from the unregularized phase diffusion equation, and the fact that the regularization is a divergence. The most important is that if $k=k_B=1$ on one side of the shock, then $k=k_B=1$ on the other side of the shock and the shock bisects the wave vectors. These shocks are the phase grain boundaries.
+    \item The USPDE come linear and separable under the hodograph transformation. The conjugate phase $\hat{\Theta}(f,g)$, related to $\Theta(X,Y)$ through the Legendre transformation $\Theta + \hat{\Theta} = \vec{k}\cdot\vec{X}$, satisfies
+        \[
+            \frac{\partial}{\partial k}(kB)\frac{\partial \hat{\Theta}}{\partial k} + \frac{1}{k}\frac{\partial}{\partial k}(kB)\frac{\partial^2 \hat{\Theta}}{\partial \varphi^2}=0.
+        \]
+    The solutions correspond to the target, the convex disckination, the concave disclination, the saddle. However, in general the solution gives a map $\vec{x} \rightarrow \vec{k}$ which is multivalued. The regularization provides the rule which puts the shock and makes the resukting phase grain boundary solution single valued. 
+\end{enumerate}
+\subsection{The self-dual reduction}
 
 \end{document}
 
