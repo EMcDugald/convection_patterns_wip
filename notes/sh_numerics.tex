@@ -185,6 +185,176 @@ To compute $(2\nabla^2+\nabla^4)w$, we create a matrix that acts as the laplacia
 Then we have
 \[
     (2\nabla^2+\nabla^4)w = \text{ifft}((2K_{\Delta}+K_{\Delta}^2)\text{fft}(w))
-\] 
+\]
+The matlab code for this approach is as follows:
+\begin{verbatim}
+function w=mySH(w, R, dt, nSteps)
+
+[nR nC]=size(w);
+if mod(nR, 2)==0
+    kR=[0:nR/2-1 -nR/2:-1]*2*pi/nR;
+else
+    kR=[0:nR/2 -floor(nR/2):-1]*2*pi/nR;
+end
+Ky=repmat(kR.', 1, nC);
+
+if mod(nC, 2)==0
+    kC=[0:nC/2-1 -nC/2:-1]*2*pi/nC;
+else
+    kC=[0:nC/2 -floor(nC/2):-1]*2*pi/nC;
+end
+Kx=repmat(kC, nR, 1); % frequencies
+K_Delta=Kx.^2+Ky.^2; % Fourier Laplacian
+FourOp = 2*K_Delta+K_Delta.*K_Delta; % Laplacian + Biharmonic
+
+for n=0:nSteps
+    linTerm = -ifft2(FourOp.*fft2(w));
+    nonLinTerm = (R-1).*w - w.^3;
+    w = dt*(linTerm+nonLinTerm)+w;
+end
+return
+\end{verbatim}
+\section{Incorporating Ideas from Meeting with Shankar}
+\textbf{Potentially relevant paper}\href{https://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.879.2994&rep=rep1&type=pdf}{olving Linear PDE by Exponential Splitting}\newline
+\textbf{Another One}\href{https://people.maths.ox.ac.uk/trefethen/publication/PDF/2005_111.pdf}{Fourth Order time stepping for stiff PDEs}\newline
+\begin{itemize}
+    \item I believe the following approach falls under the name of "Operator Splitting".
+    \item We have the PDE
+        \[
+            w_t = -(1+\nabla^2)^2w + Rw - w^3.
+        \] 
+    \item
+        We can break this into a linear part and a non-linear part,
+        \[
+            W_t = L(w) + NL(w),
+        \] 
+        with
+        \begin{align*}
+            L(w) &= (-(1+\nabla^2)^2+R)w\\
+            NL(w) &=  - w^3.
+        \end{align*}
+        Rearranging the linear part, we have
+        \begin{align*}
+            L(w) &= (-\nabla^4-2\nabla^2+R-1)w\\
+            NL(w) &= -w^3.
+        \end{align*}
+      \item 
+        Basic procedure is as follows:
+        \begin{enumerate}[(i)]
+            \item Let $A = (-\nabla^4-2\nabla^2+R-1)$. Consider the pair of PDEs
+                \begin{align*}
+                    w_t &= Aw\\
+                    w_t &= -w^3.
+                \end{align*}
+            \item
+                Handling the linear and nonlinear PDEs separately, we get the relations
+                \begin{align*}
+                    w(t+\Delta t) &= \Delta t Aw(t)+w(t)\\
+                    \implies w(t+\Delta t) &\approx e^{A\Delta t}w(t).
+                \end{align*}
+                And for the nonlinear part,
+                \begin{align*}
+                    w(t+\Delta t) &\approx -\Delta t w(t)^3+w(t).
+                \end{align*}.
+            \item
+                Let's say we have the array $w(t)$ at time $t$.
+                We wish to evolve to $w(t+\Delta t)$.
+                \begin{itemize}
+                    \item First, we evolve the linear part, for a time step of $\frac{\Delta t}{2}$.
+                    \[
+                        w(t+\Delta t)_1 = e^{A \frac{\Delta t}{2}}w(t).
+                    \] 
+                \item Then we evolve the result according to the nonlinear part, for a time step of $\Delta t$.
+                    \[
+                        w(t+\Delta t)_2 = w(t+\Delta t)_1 - \Delta t w(t+\Delta t)_1^3.
+                    \] 
+                \item Then, we evolve the result according to the linear part, for another time step of $\frac{\Delta t}{2}$,               \[
+                        w(t+\Delta t) = e^{A \frac{\Delta t}{2}}w(t+\Delta t)_2.
+                \] 
+            \item Collapsing the notation, we have
+                \[
+                    w(t+\Delta t) = e^{A \frac{\Delta t}{2}}\left[e^{A \frac{\Delta t}{2}}w(t)-\Delta t \left(e^{A\frac{\Delta t}{2}}w(t)\right)^3\right].
+                \]
+            \item 
+                The best way to handle the linear evolution, $e^{A\frac{\Delta t}{2}}w(t)$, is to do the following:
+                \[
+                    w(t+\Delta t) = \text{ifft}\left( e^{A \frac{\Delta t}{2}}\text{fft}(w(t))\right),
+                \] 
+                where $A = (-\nabla^4-2\nabla^2+R-1)$.
+            \item It is easy to verify that (depending on Fourier Transform definition), we have
+                \[
+                    \hat{\nabla^2 w} = \hat{w_{xx} + w_{yy}} = (ik_x)^2\hat{w}+(ik_y)^2\hat{w} = -(k_x^2+k_y^2)\hat{w}.
+                \] 
+                And
+                \begin{multline*}
+                    \hat{\nabla^2 w} = \hat{w_{xxxx}+w_{yyxx}+w_{xxyy}+w_{yyyy}}\\ = \left((ik_x)^4 + (ik_y)^2(ik_x)^2 + (ik_x)^2(ik_y)^2 + (ik_y)^4\right)\hat{w} = (k_x^4 + 2k_x^2k_y^2+k_y^4)\hat{w}.
+                \end{multline*}
+            \item
+                Note that $(k_x^2+k_y^2)^2 = (k_x^4+2k_x^2k_y^2+k_y^4)$
+            \item
+                Let us define the Fourier Laplacian Matrix, $M_{\nabla^2}$
+                \[
+                    M_{\nabla^2} = k_x^2+k_y^2.
+                \] 
+                Then, the Fourier Biharmonic Matrix, $M_{\nabla^4}$ is given by
+                \[
+                  M_{\nabla^4} = M_{\nabla^2} \odot M_{\nabla^2},
+                \] 
+                where $\odot$ denotes element wise multiplication.
+                Thus, we can write our matrix $A$ as
+                \[
+                    A = -(M_{\nabla^2} \odot M_{\nabla^2})-2M_{\nabla^2}+(R-1)
+                \] 
+                \end{itemize}
+        \end{enumerate}
+\end{itemize}
+The resulting code is as follows:
+\begin{verbatim}
+function w=mySH2(w, R, dt, nSteps, L)
+
+[ny, nx] = size(w); %recall: number of columns in grid is number of x-coordinates!
+
+%frequency matrix in x direction
+if mod(nx, 2)==0
+    kx=[0:nx/2-1 -nx/2:-1]*2*pi/L;
+else
+    kx=[0:nx/2 -floor(nx/2):-1]*2*pi/L;
+end
+%in python, kx = (2.*np.pi/(x[len(x)-1]-x[0]))*sp.fft.fftfreq(len(x),1./len(x))
+Kx=repmat(kx, ny, 1);
+
+%frequency matrix in y direction
+if mod(ny, 2)==0
+    ky=[0:ny/2-1 -ny/2:-1]*2*pi/L;
+else
+    ky=[0:ny/2 -floor(ny/2):-1]*2*pi/L;
+end
+%in python, ky = (2.*np.pi/(y[len(y)-1]-y[0]))*sp.fft.fftfreq(len(y),1./len(y))
+Ky=repmat(ky.', 1, nx);
+
+%in pythin, Kx, Ky = np.meshgrid(kx,ky)
+
+
+MDelta = Kx.^2+Ky.^2; % Fourier Laplacian Operator
+A = -(MDelta.*MDelta)-2*MDelta+R-1; % Linear Operator (Biharmonc, Laplacian, Constant terms)
+
+for n=0:nSteps
+    w1 = real(ifft2(expm(A*(dt/2.0))*fft2(w)));
+    w2 = w1 - dt*w1.^3;
+    w = real(ifft2(expm(A*(dt/2.0))*fft2(w2)));
+    %based on previous work in python, the below code might be whats needed
+    %w1 = fftshift(real(ifft2(expm(A*(dt/2.0))*fft2(fftshift(w)))));
+    %w2 = w1 - dt*w1.^3;
+    %w = fftshift(real(ifft2(expm(A*(dt/2.0))*fft2(fftshift(w2)))));
+end
+return
+\end{verbatim}
+\textbf{Testing the Method}
+\begin{itemize}
+    \item \textbf{Without fftshift} Did not work... need to think about this some...
+    \item
+    \item
+\end{itemize}
+
 \end{document}
 
