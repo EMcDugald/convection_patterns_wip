@@ -350,11 +350,145 @@ end
 return
 \end{verbatim}
 \textbf{Testing the Method}
-\begin{itemize}
-    \item \textbf{Without fftshift} Did not work... need to think about this some...
-    \item
-    \item
-\end{itemize}
+It didn't work- lol. Need to find the issue...
+\section{Another attempt}
+\textbf{This seems to work!} Will describe the fix later.
+\begin{verbatim}
+    function w=mySH2_v2(w, R, dt, nSteps, L)
+
+[ny, nx] = size(w); %recall: number of columns in grid is number of x-coordinates!
+
+%frequency matrix in x direction
+if mod(nx, 2)==0
+    kx=[0:nx/2-1 -nx/2:-1]*2*pi/L;
+    %kx=[0:nx/2-1 -nx/2:-1]*2*pi/nx;
+else
+    kx=[0:nx/2 -floor(nx/2):-1]*2*pi/L;
+    %kx=[0:nx/2 -floor(nx/2):-1]*2*pi/nx;
+end
+%in python, kx = (2.*np.pi/(x[len(x)-1]-x[0]))*sp.fft.fftfreq(len(x),1./len(x))
+Kx=repmat(kx, ny, 1);
+
+%frequency matrix in y direction
+if mod(ny, 2)==0
+    ky=[0:ny/2-1 -ny/2:-1]*2*pi/L;
+    %ky=[0:ny/2-1 -ny/2:-1]*2*pi/ny;
+else
+    ky=[0:ny/2 -floor(ny/2):-1]*2*pi/L;
+    %ky=[0:ny/2 -floor(ny/2):-1]*2*pi/ny;
+end
+%in python, ky = (2.*np.pi/(y[len(y)-1]-y[0]))*sp.fft.fftfreq(len(y),1./len(y))
+Ky=repmat(ky.', 1, nx);
+
+%in pythin, Kx, Ky = np.meshgrid(kx,ky)
+
+
+MDelta = -(Kx.^2+Ky.^2); % Fourier Laplacian Operator
+A = -(MDelta.*MDelta)-2*MDelta+R-1; % Linear Operator (Biharmonc, Laplacian, Constant terms)
+
+for n=0:nSteps
+    w1 = real(ifft2(exp(A*(dt/2.0)).*fft2(w)));
+    w2 = w1 - dt*w1.^3;
+    w = real(ifft2(exp(A*(dt/2.0)).*fft2(w2)));
+    %based on previous work in python, the below code might be whats needed
+    %w1 = fftshift(real(ifft2(expm(A*(dt/2.0))*fft2(fftshift(w)))));
+    %w2 = w1 - dt*w1.^3;
+    %w = fftshift(real(ifft2(expm(A*(dt/2.0))*fft2(fftshift(w2)))));
+end
+return
+\end{verbatim}
+\textbf{Test 1- square from -16 to 16, init is $.1(\cos(x)+\sin(y))$, 100 time steps, $dt=.1$, $R=.5$}.
+\begin{enumerate}[(a)]
+    \item Results of my code:
+        \begin{verbatim}
+>> x=linspace(-16,16,256);
+>> y=linspace(-16,16,256);
+>> [X,Y]=meshgrid(x,y);
+>> dt=.1; L=x(length(x))-x(1); R=.5; nSteps=100;
+>> w0=.1*(cos(X)+sin(Y));
+>> w_T = mySH2_v2(w0,R,dt,nSteps,L);
+>> imagesc(w_T);
+>> saveas(gcf,'/Users/edwardmcdugald/Research/
+convection_patterns_matlab/figs/mySH_tst_1.png');
+        \end{verbatim}
+
+    \begin{figure}[ht]
+        \centering
+        \includegraphics[scale=.7]{mySH_tst_1.png}
+        \caption{My SH Implementation}
+    \end{figure}
+
+\item \textbf{chebfun result}
+    \begin{verbatim}
+>> dom = [-16 16 -16 16];
+>> tspan=[0 10];
+>> S=spinop2(dom,tspan);
+>> S.lin = @(w) -2*lap(w)-biharm(w);
+>> S.nonlin = @(w) -.5*w-w.^3;
+>> S.init = .1*chebfun2(@(x,y) cos(x)+sin(y),dom,'trig');
+In chebfun2 (line 82) 
+>> w=spin2(S,256,1e-1,'plot','off');
+>> plot(w),view(0,90),axis equal, axis off
+>> saveas(gcf,'/Users/edwardmcdugald/Research/
+convection_patterns_matlab/figs/mySH_tst_compare_1.png');
+    \end{verbatim}
+
+     \begin{figure}[ht]
+        \centering
+        \includegraphics[scale=.7]{mySH_tst_compare_1.png}
+        \caption{Chebfun SH Implementation}
+    \end{figure}
+\end{enumerate}
+
+\textbf{Test 2- same as test 1, but with 1000 time steps}
+
+\begin{enumerate}[(a)]
+    \item Results of my code
+        \begin{verbatim}
+>> x=linspace(-16,16,256);
+>> y=linspace(-16,16,256);
+>> [X,Y]=meshgrid(x,y);
+>> dt=.1; L=x(length(x))-x(1); R=.5; nSteps=1000;
+>> w0=.1*(cos(X)+sin(Y));
+>> w_T=mySH2_v2(w0,R,dt,nSteps,L);
+>> imagesc(w_T);
+>> saveas(gcf,'/Users/edwardmcdugald/Research/
+convection_patterns_matlab/figs/mySH_tst_2.png');
+        \end{verbatim}
+     \begin{figure}[ht]
+        \centering
+        \includegraphics[scale=.7]{mySH_tst_2.png}
+        \caption{My SH Implementation}
+    \end{figure}
+
+    \item Chebfun Result
+        \begin{verbatim}
+>> dom=[-16 16 -16 16];
+>> tspan=[0 100];
+>> S=spinop2(dom,tspan);
+>> S.lin=@(u)-2*lap(u)-biharm(u);
+>> S.nonlin = @(u) -.5*u - u.^3;
+>> S.init = .1*chebfun2(@(x,y) cos(x)+sin(y),dom,'trig');
+Warning: Unresolved with maximum CHEBFUN length: 65536. 
+> In chebfun2/constructor (line 201)
+In chebfun2 (line 82) 
+>> u=spin2(S,256,1e-1,'plot','off');
+>> plot(u), view(0,90),axis equal, axis off;
+>> saveas(gcf,'/Users/edwardmcdugald/Research/
+convection_patterns_matlab/figs/mySH_tst_compare_2.png');
+        \end{verbatim}
+ \begin{figure}[ht]
+        \centering
+        \includegraphics[scale=.7]{mySH_tst_compare_2.png}
+        \caption{Chebfun SH Implementation}
+    \end{figure}
+    \FloatBarrier
+\end{enumerate}
+
+\textbf{Test 3- square from 0 to $20\pi$ , init is $.1(\cos(x)+\sin(y)+\exp(-((x-5\pi)^2+(y-5\pi)^2)))$, 200 time steps, $dt=1$, $R=.1$}
+\begin{enumerate}[(a)]
+    \item Results of my code
+\end{enumerate}
 
 \end{document}
 
