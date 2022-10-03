@@ -8,6 +8,7 @@
 \usepackage{graphicx}
 \usepackage[section]{placeins}
 \usepackage{amssymb}
+\usepackage{bm}
 \usepackage{listings}
 \usepackage{amsmath,tkz-euclide}
 \usepackage{tikz}
@@ -33,7 +34,68 @@
 
 \begin{document}
 \maketitle
+\section{Introduction}
+Convection rolls are known for their pattern forming properties. 
+Experimental results demonstrate a range of patterns, which appear to be well-modeled by the Swift-Hohenberg PDE.
+\[
+    w_t = -(1+\nabla^2)^2w + Rw - w^3.
+\] 
+Work by Cross and Newell has sought to find generic models for pattern forming systems meeting certain conditions.
+The most prevalent model in the literature appears to be essentially the minimizers of the regularized Cross-Newell energy functional
+\[
+    \varepsilon^{(\mu)}(\Theta) = \mu \int_{\Omega}(\nabla_{\vec{X}}\Theta)^2d\vec{X}+\frac{1}{\mu}\int_{\Omega}\left(1-\lvert \nabla_{\vec{X}}\Theta\rvert^2\right)^2d\vec{X}.
+\]
+The Cross-Newell framework does not capture all possible patterns and pattern defects seen in experiments, nor seen in SH simulations. The problem at hand is to find a Cross-Newell like equation that predicts a wider class of patterns than the current Cross-Newell equations.\newline
+The current document outlines machine learning models to a range of related problems. Typically, machine learning experiments on PDE data either seek reduced order models as output, or seek to generate more efficient simulation algorithms. The range of machine learning experiments that will be explored here is not yet determined. Some of the main papers of interest here are the following: \newline
+ \href{https://www.pnas.org/doi/pdf/10.1073/pnas.1517384113}{OG Kutz paper on SINDy- applicable to Dynamical Systems}.\newline
+    \href{https://www.pnas.org/doi/pdf/10.1073/pnas.1906995116}{Describes SINDy like approach for PDE data}\newline
+    \href{https://reader.elsevier.com/reader/sd/pii/S0045782522004807?token=828D185F06DE28418D9E46B544E846EEDC227470A1436A8191877A3EC18DC832E4B81EE95D31BCC28E5B0B0B7D00373C&originRegion=us-east-1&originCreation=20220928051957}{Published paper on LaSDI- Bill's work}\newline
+    \href{https://arxiv.org/pdf/2204.12005.pdf}{gLaSDI preprint - Bill's work}\newline
+    \href{https://reader.elsevier.com/reader/sd/pii/S0021999117304588?token=27B5FCDE852ABD4BCA5D820B055D0B3DB365A6480F33F3B493D751636ED7B3022E5732B63C7EFBE609EC0C218FF980E7&originRegion=us-east-1&originCreation=20220928201508}{Reduced Order model via 2 point correlations (2017) Materials Science}\newline
+    \href{https://reader.elsevier.com/reader/sd/pii/S1359645417310443?token=80B58C2FA5BF8E643CE2126B7EBF4EDA518A01E03E388665ADD5D11798BD7AFBACAC75E2DA798D3C67C66F9002B6314B&originRegion=us-east-1&originCreation=20220928201608}{Materials Science CNN}
 
+\section{Original Work on SINDy}
+\subsection{Some Context}
+\begin{itemize}
+    \item The goal is to extract parsimonious models from data. Can be called the dynamical system discovery problem.
+    \item The framework is made possible by work from Bongard and Lipson (Automated reverse engineering of nonlinear dynamical systems), and Schmidt and Lipson (Distilling free-form natural laws from experimental data). The method uses \emph{symbolic regression} to find nonlienar differential equations, balancing complexity with accuracy.
+    \item Symbolic regression is expensive, does not scale well to large systems, and can be prone to overfitting. 
+    \item A good review of methods for the dynamical system discovery problem can be found here: \href{https://www.nature.com/articles/ncomms9133.pdf}{Automated adaptive inference of phenomenological dynamical models}.
+\end{itemize}
+\subsection{Sparse Identification of Nonlinear Dynamics (SINDy)}
+Note, a useful appendix is found here: \href{https://www.pnas.org/action/downloadSupplement?doi=10.1073%2Fpnas.1517384113&file=pnas.1517384113.sapp.pdf}{Appendix}
+\begin{itemize}
+    \item Views dynamical system discovery from persepctive of sparse regression and compressed sensing.
+    \item Assumes most physical systems have only a few relevant terms, making governing equations sparse in a high-dimensoonal nonlinear function space.
+    \item Consider dynamical systems of the form
+        \[
+            \frac{d}{dt}\bm{x}(t) = f(\bm{x}(t))
+        \]
+    \item To determine the function $\bm{f}$ from data, we collect a time history of the state $\bm{x}(t)$ and either measure the derivative $\dot{\bm{x}}(t)$ or approximate it numerically from $\bm{x}(t)$. The data are sampled at $t_1, t_2, \dots, t_m$ and arranged into two matrices:
+        \[
+            \bm{X} = \begin{bmatrix}\bm{x}^T(t_1)\\ \bm{x}^T(t_2)\\ \vdots \\ \bm{x}^T(t_m)\end{bmatrix} = \begin{bmatrix}x_1(t_1) & x_2(t_1) & \dots & x_n(t_1)\\ x_1(t_2) & x_2(t_2) & \dots & x_n(t_2)\\ \vdots & \vdots & \ddots & \vdots \\ x_1(t_m) & x_2(t_m) & \dots & x_n(t_m)\end{bmatrix},
+        \] 
+        and
+         \[
+             \bm{\dot{X}} = \begin{bmatrix}\bm{\dot{x}}^T(t_1)\\ \bm{\dot{x}}^T(t_2)\\ \vdots \\ \bm{\dot{x}}^T(t_m)\end{bmatrix} = \begin{bmatrix}\dot{x}_1(t_1) & \dot{x}_2(t_1) & \dots & \dot{x}_n(t_1)\\ \dot{x}_1(t_2) & \dot{x}_2(t_2) & \dots & \dot{x}_n(t_2)\\ \vdots & \vdots & \ddots & \vdots \\ \dot{x}_1(t_m) & \dot{x}_2(t_m) & \dots & \dot{x}_n(t_m)\end{bmatrix}.
+        \]
+    \item Then we construct a library $\Theta(\bm{X})$ consisting of candidate nonlinear functions of the columns of $\bm{X}$. For example, $\Theta(\bm{X})$ may consist of constant, polynomical, and trigonometric terms:
+        \[
+            \Theta(\bm{X}) = \left[ \bm{1} \bm{X} \bm{X^{P_2}} \bm{X^{P_3}} \dots \sin(\bm{X}) \cos(\bm{X}) \dots \right].
+        \]
+    \item Each column of $\Theta(\bm{X})$ represents a candidate functions for the right-hand side.
+    \item There is tremendous freedom in choosing the entries in this matrix of nonlinearities. Since we assume only a few of them are active in each row of $f$, we set up a sparse regression problem to determine the sparse vectors of coefficients
+        \[
+            \bm{\Xi} = \left[ \bm{\xi}_1 \bm{\xi}_2 ... \bm{\xi}_n\right]
+        \] 
+        that determine which nonlinearities are active:
+        \[
+            \dot{\bm{X}} = \Theta(\bm{X})\bm{\Xi}.
+        \] 
+       \end{itemize}
+\section{SINDy for PDE}
+The code for this paper is here: \href{https://github.com/kpchamp/SindyAutoencoders}{github}
+Also, there is a "supporting work" pdf available as well.
 
 
 \end{document}

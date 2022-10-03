@@ -38,11 +38,53 @@
 \section{9/25}
 Desired tasks for the day:
 \begin{itemize}
-\item Make more test case comparisons of my method vs chebfun
-\item Convert my Matlab code to Python
-\item Read paper on 2 point correlations
-\item Incorporate Leonid's utils module for writing to disk and plotting
+\item Make more test case comparisons of my method vs chebfun- tested T=10 and T=100, tried something
+with an exponential term, which blew up. need to see what happens there with chebfun
+\item Convert my Matlab code to Python - completed. still need to make fipy.py executable in terminal
+\item Read paper on 2 point correlations - not completed- top priority for next research session
+\item Incorporate Leonid's utils module for writing to disk and plotting - completed. still would like to get fipy working
+\end{itemize}
+Some musings: would like to understand analytically what is going on.
+A good idea would be to read 9 papers.
+You could do 3 in mathematical analysis (Cross-Newell stuff)
+3 in numerics (just pick 3)
+3 in ML (2 point correlations, CNN, SH Laser pattern prediction)
+Neat idea: Save a bunch of swift hohenberg simulations on chebfun.
+Make a dataset by saving the images in grey scale, labeled with R value. Make a neural net that
+can generate patterns from an R value??? Talk to Marat about this.
+Could extend this to include image of the simulation, coupled with the initial function, the final time, the R value
+Write a ML alg that predicts these data???
+Would be interesting to test this with only one initial condition- a guassian (to imitate head from center)
+and a constant (uniform heat). Then perhaps this could be compared with experimental data. See if the model can predict
+parameters to feed swift hohenberg?
+Think more about the wave vector and eikonal equation.
+
+\section{9/27}
+\begin{itemize}
+    \item 
+        I had an excellent talk with Bill Fries \href{https://sites.google.com/view/frieswd}{Bill's Info} about designing an experiment with PDE data. He was optimistic about. There is a well documented method, mostly coming from the folks at UW. Bill has an example of an experiemnt to get reduced order model of 2D burger's on his site.\newline
+    Some good resources:\newline
+    \href{https://www.pnas.org/doi/pdf/10.1073/pnas.1517384113}{OG Kutz paper on SINDy- applicable to Dynamical Systems}.\newline
+    \href{https://www.pnas.org/doi/pdf/10.1073/pnas.1906995116}{Describes SINDy like approach for PDE data}\newline
+    \href{https://reader.elsevier.com/reader/sd/pii/S0045782522004807?token=828D185F06DE28418D9E46B544E846EEDC227470A1436A8191877A3EC18DC832E4B81EE95D31BCC28E5B0B0B7D00373C&originRegion=us-east-1&originCreation=20220928051957}{Published paper on LaSDI- Bill's work}\newline
+    \href{https://arxiv.org/pdf/2204.12005.pdf}{gLaSDI preprint - Bill's work}\newline
+    I would like to use the above resources to run an experiment to see if a Neural Net can predict SH equation. Apparently, only a few simulations are needed. Note that I need to save the full time evolution data, and must keep the parameter fixed for each experiment. Perhaps, we could see what reduced order models are predicted for R values exhibiting different patterns. Note that for each simulation, we change just the initial condition. This makes sense.
+\item Talked to Teddy and Sheila, and learned that they are learning about operator splitting (Strang Splitting) in Numerical PDEs. Would like to better understand this method, and the theory behind it.
+\item Need to get serious about the mathematical analysis. Would like to understand the 2022, 2003, 2000, and 1996 papers.
+\item Still need to make $R$ a non-constant- ie an indicator function
+\item So game plan is to develop knowledge of (1) SINDy methods, (2) Operator Splitting and (3) mathematical analysis of Cross-Newell equation.
 \end{itemize}
 
+\section{9/28}
+For mathematical analysis, read:
+\begin{itemize}
+\item \href{https://reader.elsevier.com/reader/sd/pii/0167278984901817?token=4D223BF072CC8BC8B10B898BAD413C5321ECECB3ED3BD955E230D070B9EF199217ECA027EB81D62E06F291D11DC1F6BF&originRegion=us-east-1&originCreation=20220928193234}{Convection Patterns in Large Aspect Ratio Systems (1984)}
+\item \href{https://www.math.arizona.edu/~anewell/publications/Geometry_Phase_Diffusion_Eq.pdf}{The Geometry of the Phase Diffusion Equation (2000)}
+\item \href{https://link-springer-com.ezproxy2.library.arizona.edu/content/pdf/10.1007/s00332-008-9035-9.pdf}{A Variational Theory for Point Defects in Patterns (2008)}
+\item \href{https://reader.elsevier.com/reader/sd/pii/0167278996000735?token=7B13D427DB6F1344FB2FB30E3AB40BF19A94D5978773B0B404E981CE661E13AF2D09A29C84928DDB4DE9CAD7FA3CB105&originRegion=us-east-1&originCreation=20220928200316}{Defects are Weak and self-dual solutions of the Cross-Newell phase diffusion equation for natural patterns (1996)}
+\item \href{https://reader.elsevier.com/reader/sd/pii/S0167278903002173?token=0D059631EB67C2E045F7E0D8F5815A75F9E0F5CE3CB817BE1D86B644AC91459ECF4B68E044F6787CB80290A8A6451C65&originRegion=us-east-1&originCreation=20220928200420}{Global description of patterns far from onset: a case study (2003)}
+\item \href{https://www.cmu.edu/cee/convergence/preprints/UniversalBehaviorModulatedStripePatterns.pdf}{The universal behavior of modulated stripe patterns (2022)}
+\end{itemize}
+The 2008 paper might hint at what patterns are not "covered" by Cross Newell equation
 \end{document}
 
