@@ -48,11 +48,15 @@ The most prevalent model in the literature appears to be essentially the minimiz
 The Cross-Newell framework does not capture all possible patterns and pattern defects seen in experiments, nor seen in SH simulations. The problem at hand is to find a Cross-Newell like equation that predicts a wider class of patterns than the current Cross-Newell equations.\newline
 The current document outlines machine learning models to a range of related problems. Typically, machine learning experiments on PDE data either seek reduced order models as output, or seek to generate more efficient simulation algorithms. The range of machine learning experiments that will be explored here is not yet determined. Some of the main papers of interest here are the following: \newline
  \href{https://www.pnas.org/doi/pdf/10.1073/pnas.1517384113}{OG Kutz paper on SINDy- applicable to Dynamical Systems}.\newline
+ \href{https://www.science.org/doi/pdf/10.1126/sciadv.1602614}{Kutz paper on PDE-FIND}\newline
+ \href{https://github.com/snagcliffs/PDE-FIND}{Git for PDE-FIND}\newline
+ \href{https://github.com/dynamicslab/pysindy}{PySINDy}\newline
     \href{https://www.pnas.org/doi/pdf/10.1073/pnas.1906995116}{Describes SINDy like approach for PDE data}\newline
     \href{https://reader.elsevier.com/reader/sd/pii/S0045782522004807?token=828D185F06DE28418D9E46B544E846EEDC227470A1436A8191877A3EC18DC832E4B81EE95D31BCC28E5B0B0B7D00373C&originRegion=us-east-1&originCreation=20220928051957}{Published paper on LaSDI- Bill's work}\newline
     \href{https://arxiv.org/pdf/2204.12005.pdf}{gLaSDI preprint - Bill's work}\newline
     \href{https://reader.elsevier.com/reader/sd/pii/S0021999117304588?token=27B5FCDE852ABD4BCA5D820B055D0B3DB365A6480F33F3B493D751636ED7B3022E5732B63C7EFBE609EC0C218FF980E7&originRegion=us-east-1&originCreation=20220928201508}{Reduced Order model via 2 point correlations (2017) Materials Science}\newline
-    \href{https://reader.elsevier.com/reader/sd/pii/S1359645417310443?token=80B58C2FA5BF8E643CE2126B7EBF4EDA518A01E03E388665ADD5D11798BD7AFBACAC75E2DA798D3C67C66F9002B6314B&originRegion=us-east-1&originCreation=20220928201608}{Materials Science CNN}
+    \href{https://reader.elsevier.com/reader/sd/pii/S1359645417310443?token=80B58C2FA5BF8E643CE2126B7EBF4EDA518A01E03E388665ADD5D11798BD7AFBACAC75E2DA798D3C67C66F9002B6314B&originRegion=us-east-1&originCreation=20220928201608}{Materials Science CNN}\newline
+    \href{https://royalsocietypublishing.org/doi/epdf/10.1098/rspa.2016.0446}{Learning PDEs via data discovery and sparse optimization}
 
 \section{Original Work on SINDy}
 \subsection{Some Context}
@@ -97,6 +101,25 @@ Note, a useful appendix is found here: \href{https://www.pnas.org/action/downloa
 The code for this paper is here: \href{https://github.com/kpchamp/SindyAutoencoders}{github}
 Also, there is a "supporting work" pdf available as well.
 
+\subsection{10/4 - replicating results for Reaction-Diffusion equation}
+\begin{itemize}
+    \item I am going to try replicating result for the PDE presented.
+    \item Step 1 is making or obtaining numerical solver for the PDE.
+\end{itemize}
+\subsubsection{Reaction Diffusion Data Acquisition/Simulation}
+We wish to get data from the PDE
+\begin{align*}
+    u_t &= \left(1-(u^2+v^2) \right)u + \beta(u^2+v^2)v + d_1(u_{xx}+u_{yy})\\
+    v_t &= -\beta(u^2+v^2)u + \left(1-(u^2+v^2)\right)v + d_2(u_{xx}+v_{yy}),
+\end{align*}
+with $d_1,d_2=.1$ and $\beta = 1$.
+We will test the method on snapshots of the surface $u(x,y,t)$.
+We will use a single initial condition,
+\begin{align*}
+    u(y_1,y_2,0)&= \tanh\left(\sqrt{y_1^2+y_2^2}\cos\left(\text{arg}(y_1+iy_2)-\sqrt{y_1^2+y_2^2}\right)\right)\\
+    v(y_1,y_2,0) &= \tanh\left(\sqrt{y_1^2+y_2^2}\sin\left(\text{arg}(y_1+iy_2)-\sqrt{y_1^2+y_2^2}\right)\right).
+\end{align*}
+We use $t=0$ to $t=10$ with a spacing of $\Delta t = .05$
 
 \end{document}
 
