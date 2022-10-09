@@ -97,9 +97,18 @@ Note, a useful appendix is found here: \href{https://www.pnas.org/action/downloa
             \dot{\bm{X}} = \Theta(\bm{X})\bm{\Xi}.
         \] 
        \end{itemize}
-\section{SINDy for PDE}
+\section{SINDy + Coordinate Discovery - Includes PDE Example}
+The main paper is \href{https://www.pnas.org/doi/pdf/10.1073/pnas.1906995116}{Data driven discovery of coordinates and governing equations}\newline
 The code for this paper is here: \href{https://github.com/kpchamp/SindyAutoencoders}{github}
-Also, there is a "supporting work" pdf available as well.
+Also, there is a "supporting work" pdf available as well.\newline
+This work breaks down the "data discovery process" in a few steps:
+\begin{itemize}
+    \item Measure data
+    \item Approximate derivatives from data. If data is noisy, there is a method to handle that
+    \item Construct library of functions.
+    \item Jointly solve a sparse regression problem for model discovery, and use an autoeconder neural network for coordiante discover.
+    \item I don't what this means yet, but will figure it out...
+\end{itemize}
 
 \subsection{10/4 - replicating results for Reaction-Diffusion equation}
 \begin{itemize}
@@ -110,7 +119,7 @@ Also, there is a "supporting work" pdf available as well.
 We wish to get data from the PDE
 \begin{align*}
     u_t &= \left(1-(u^2+v^2) \right)u + \beta(u^2+v^2)v + d_1(u_{xx}+u_{yy})\\
-    v_t &= -\beta(u^2+v^2)u + \left(1-(u^2+v^2)\right)v + d_2(u_{xx}+v_{yy}),
+    v_t &= -\beta(u^2+v^2)u + \left(1-(u^2+v^2)\right)v + d_2(v_{xx}+v_{yy}),
 \end{align*}
 with $d_1,d_2=.1$ and $\beta = 1$.
 We will test the method on snapshots of the surface $u(x,y,t)$.
@@ -119,7 +128,7 @@ We will use a single initial condition,
     u(y_1,y_2,0)&= \tanh\left(\sqrt{y_1^2+y_2^2}\cos\left(\text{arg}(y_1+iy_2)-\sqrt{y_1^2+y_2^2}\right)\right)\\
     v(y_1,y_2,0) &= \tanh\left(\sqrt{y_1^2+y_2^2}\sin\left(\text{arg}(y_1+iy_2)-\sqrt{y_1^2+y_2^2}\right)\right).
 \end{align*}
-We use $t=0$ to $t=10$ with a spacing of $\Delta t = .05$
+We use $t=0$ to $t=500$ with a spacing of $\Delta t = .05$
 
 \end{document}
 
