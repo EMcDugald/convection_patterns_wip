@@ -50,6 +50,7 @@
     \item Note that analysis of full hydrodynamic equations is much more complicated. Even fully nonlinear spatially periodic solutions cannot be explicitly constructed. Further, due to the vertically uniform pressure field $P_s(x,y,t)$, a gradient expansion of Oberbeck-Boussinesq in terms of a single phase variable is not smooth, except at infinity Pramdtl number. Thus, the field $P_s$ should be incorporated into the expansion of $\theta_t$. The main conclusions are significantly changed by this. Thus, we consider model equations supplemented with mean drift terms. We also discuss the additional mechanisms for the onset of time dependence as the Rayleigh number is increased, in particular as it relates to the skew varicose instability.
   \end{itemize}
 \subsection{Analysis}
+\subsubsection{Model Equations}
 \begin{itemize}
     \item The given models (I and II) are similar in that they both admit a simple class of one parameter, steady, periodic solutions.
         \[
@@ -76,9 +77,26 @@
         \[
             w(x,y,t) = w^{(0)}(\theta; X,Y,T)+\sum_{p}\eta^{2p}w^{(p)}(\theta;X,Y,T) \quad (3),
         \] 
-        where $w^{(0)}(\theta;X,Y,T)=f(\theta;A,k)=Ae^{i\theta}$. The parameters $A,k$ are no longer constant but functions of $X,Y,T$.
+        where $w^{(0)}(\theta;X,Y,T)=f(\theta;A,k)=Ae^{i\theta}$. The parameters $A,k$ are no longer constant but functions of $X,Y,T$. They are also related by (2).
     \item This formulation has the advantage of establishing orientational degeneracy of the equations at the outset; no specific orientation is favored.
-    \item Goal is to find equations for the quantities $A(X,Y,T)$ and $\bm{k}(X,Y,T)$. We do this by substituting (3) into (1),
+    \item Goal is to find equations for the quantities $A(X,Y,T)$ and $\bm{k}(X,Y,T)$. We do this by substituting (3) into (1), noting that
+        \begin{align*}
+            \nabla_x w(\theta ; X,Y,T) &= (\bm{k}\partial_\theta + \eta^2 \nabla_{\bm{X}})w(\theta;X,Y,T)\\
+            \partial_t w(\theta; X,Y,T) &= (\eta^2\Theta_T\partial_\theta +\eta^4\partial_T)w(\theta;X,Y,T), \quad (4)
+        \end{align*}
+        \textbf{Need to figure out how these are validated!}.
+        and solving the resulting ODEs for $w^{(0)}, w^{(p)}$ at the successive orders $\eta^{2p}$ for $p=0,1,2,\dots$, and demanding that the asymptotic expansion (3) has that each $w^{(p)}$ is $2\pi$-periodic in $\theta$. This leads to solvability conditions that are successive approximations to the dynamic equations for the phase variable $\Theta(X,Y,T)$. Unless $R$ is close to $R_c$, the amplitude $A$ is determined algebraicly by the local wavenumber. Otherwise it satisfies a PDE.
+    \item We introduce the coordinates $\alpha(X,Y)=\Theta$ and $\beta(X,Y)$,
+        \begin{align*}
+            \alpha_X &= k\cos\psi\\
+            \alpha_Y &= k\sin\psi\\
+            \beta_X &= -l\sin\psi\\
+            \beta_Y &= l\cos\psi.
+        \end{align*}
+        Note that the Jacobian of the transformation from $(\alpha,\beta)$ to $(X,Y)$ is $kl$ \textbf{why??? does $\alpha_X$ mean first component of $\alpha$, or derivative with respect to $X$}.\newline
+        The curves $\alpha(X,Y)=\text{constant}$ are the loci of constant phase, while the $\beta$ coordinates are the orthogonal trajectories, and measure the distance along the rolls. The curvature $\kappa_{\alpha}$.
+
+
 \end{itemize}
 
 

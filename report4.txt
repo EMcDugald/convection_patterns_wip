@@ -1,0 +1,29 @@
+TensorFlow 2.0 Upgrade Script
+-----------------------------
+Converted 1 files
+Detected 1 issues that require attention
+--------------------------------------------------------------------------------
+--------------------------------------------------------------------------------
+File: /Users/edwardmcdugald/Research/convection_patterns/code/champion_codes/training.py
+--------------------------------------------------------------------------------
+/Users/edwardmcdugald/Research/convection_patterns/code/champion_codes/training.py:60:8: WARNING: *.save requires manual check. (This warning is only applicable if the code saves a tf.Keras model) Keras model.save now saves to the Tensorflow SavedModel format by default, instead of HDF5. To continue saving to HDF5, add the argument save_format='h5' to the save() function.
+================================================================================
+Detailed log follows:
+
+================================================================================
+--------------------------------------------------------------------------------
+Processing file '/Users/edwardmcdugald/Research/convection_patterns/code/champion_codes/training.py'
+ outputting to '/Users/edwardmcdugald/Research/convection_patterns/code/champion_codes/training_v2.py'
+--------------------------------------------------------------------------------
+
+12:20: INFO: Renamed 'tf.placeholder' to 'tf.compat.v1.placeholder'
+13:15: INFO: Renamed 'tf.train.AdamOptimizer' to 'tf.compat.v1.train.AdamOptimizer'
+14:26: INFO: Renamed 'tf.train.AdamOptimizer' to 'tf.compat.v1.train.AdamOptimizer'
+15:12: INFO: Renamed 'tf.train.Saver' to 'tf.compat.v1.train.Saver'
+15:36: INFO: Renamed 'tf.get_collection' to 'tf.compat.v1.get_collection'
+15:54: INFO: Renamed 'tf.GraphKeys' to 'tf.compat.v1.GraphKeys'
+29:9: INFO: Renamed 'tf.Session' to 'tf.compat.v1.Session'
+30:17: INFO: Renamed 'tf.global_variables_initializer' to 'tf.compat.v1.global_variables_initializer'
+60:8: WARNING: *.save requires manual check. (This warning is only applicable if the code saves a tf.Keras model) Keras model.save now saves to the Tensorflow SavedModel format by default, instead of HDF5. To continue saving to HDF5, add the argument save_format='h5' to the save() function.
+--------------------------------------------------------------------------------
+

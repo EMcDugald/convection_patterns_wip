@@ -1,0 +1,17 @@
+TensorFlow 2.0 Upgrade Script
+-----------------------------
+Converted 1 files
+Detected 0 issues that require attention
+--------------------------------------------------------------------------------
+================================================================================
+Detailed log follows:
+
+================================================================================
+--------------------------------------------------------------------------------
+Processing file '/Users/edwardmcdugald/Research/convection_patterns/code/champion_codes/rd_analysis/train_reactiondiffusion.ipynb'
+ outputting to '/Users/edwardmcdugald/Research/convection_patterns/code/champion_codes/rd_analysis/train_reactiondiffusion_v2.ipynb'
+--------------------------------------------------------------------------------
+
+56:4: INFO: Renamed 'tf.reset_default_graph' to 'tf.compat.v1.reset_default_graph'
+--------------------------------------------------------------------------------
+

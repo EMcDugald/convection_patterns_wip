@@ -3,12 +3,12 @@ import scipy as sp
 from scipy.integrate import solve_ivp
 from scipy.io import savemat
 
-t = np.arange(0,500.05,.05)
+t = np.arange(0,10.05,.05)
 d1=0.1
 d2=0.1
 beta=1.0
 L=20
-n=100
+n=512
 N=n**2
 x2 = np.linspace(-L/2,L/2,n+1)
 x = x2[0:len(x2)-1]
@@ -19,8 +19,8 @@ X, Y = np.meshgrid(x,y)
 KX, KY = np.meshgrid(kx,ky)
 K2 = KX**2+KY**2
 K22 = np.reshape(K2,(N,1))
+
 m=1.0
-f=np.exp(-.01*(X**2+Y**2))
 
 
 def reaction_diffusion_rhs(t_dummy,uvt):
@@ -42,23 +42,13 @@ def reaction_diffusion_rhs(t_dummy,uvt):
 
 u = np.zeros(shape=(len(x),len(y),len(t)))
 v = np.zeros(shape=(len(x),len(y),len(t)))
-uf = np.zeros(shape=(len(x),len(y),len(t)))
-vf = np.zeros(shape=(len(x),len(y),len(t)))
-
-du = np.zeros(shape=(len(x),len(y),len(t)))
-dv = np.zeros(shape=(len(x),len(y),len(t)))
-duf = np.zeros(shape=(len(x),len(y),len(t)))
-dvf = np.zeros(shape=(len(x),len(y),len(t)))
 
 u[:,:,0]=np.tanh(np.sqrt(X**2+Y**2))*np.cos(m*np.angle(X+Y*1j)-np.sqrt(X**2+Y**2))
 v[:,:,0]=np.tanh(np.sqrt(X**2+Y**2))*np.sin(m*np.angle(X+Y*1j)-np.sqrt(X**2+Y**2))
-uf[:,:,0]=f*u[:,:,0]
-vf[:,:,0]=f*v[:,:,0]
+
 
 uvt = np.hstack((np.reshape(sp.fft.fft2(u[:,:,0].T),(1,N)),np.reshape(sp.fft.fft2(v[:,:,0].T),(1,N)))).T
 uvt_rhs = reaction_diffusion_rhs(t[0],uvt)
-du[:,:,0]=np.real(sp.fft.ifft2(np.reshape(uvt_rhs[0:N].T,(n,n))))
-dv[:,:,0]=np.real(sp.fft.ifft2(np.reshape(uvt_rhs[N:2*N].T,(n,n))))
 
 uvsol = np.zeros(shape=(N+1,2*N),dtype='complex')
 uvsol[0,:]=uvt.flatten()
@@ -77,23 +67,9 @@ for j in range(len(t)-1):
     u[:,:,j+1]=np.real(sp.fft.ifft2(ut))
     v[:,:,j+1]=np.real(sp.fft.ifft2(vt))
 
-    uvt_rhs = reaction_diffusion_rhs(t[j+1],uvsol[j,0:2*N].T)
-    du[:,:,j+1] = np.real(sp.fft.ifft2(np.reshape(uvt_rhs[0:N].T,(n,n))))
-    dv[:,:,j+1] = np.real(sp.fft.ifft2(np.reshape(uvt_rhs[N:2*N].T,(n,n))))
 
-    uf[:,:,j+1] = f*u[:,:,j+1]
-    vf[:,:,j+1] = f*v[:,:,j+1]
-    duf[:,:,j+1] = f*du[:,:,j+1]
-    dvf[:,:,j+1] = f*dv[:,:,j+1]
-
-t = t[2:N+1]
-uf = uf[:,:,2:N+1]
-vf = vf[:,:,2:N+1]
-duf = duf[:,:,2:N+1]
-dvf = dvf[:,:,2:N+1]
-
-mdict={"t":t,"x":x,"y":y,"uf":uf,"vf":vf,"duf":duf,"dvf":dvf}
-savemat("/Users/edwardmcdugald/Research/convection_patterns/code/data/rd1.mat",mdict)
+mdict={"t":t,"x":x,"y":y,"u":u,"v":v}
+savemat("/Users/edwardmcdugald/Research/convection_patterns/code/data/rd2.mat",mdict)
 
 
 
