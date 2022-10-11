@@ -52,9 +52,9 @@ uvt_rhs = reaction_diffusion_rhs(t[0],uvt)
 
 uvsol = np.zeros(shape=(N+1,2*N),dtype='complex')
 uvsol[0,:]=uvt.flatten()
+print("starting ode solver")
 for i in range(1,len(t)):
-    if i%1000==0:
-        print(i)
+    print(i)
     tspan = [t[i-1],t[i]]
     y0 = uvt.flatten()
     sol = solve_ivp(reaction_diffusion_rhs, tspan, y0,vectorized=True)
