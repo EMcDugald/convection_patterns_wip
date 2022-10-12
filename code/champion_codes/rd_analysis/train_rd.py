@@ -7,6 +7,8 @@ from sindy_utils import library_size
 from training_v2 import train_network
 import tensorflow as tf
 
+print('starting')
+
 training_data, validation_data, test_data = get_rd_data()
 
 params = {}
