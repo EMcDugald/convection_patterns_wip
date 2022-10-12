@@ -62,3 +62,5 @@ for i in range(num_experiments):
     df = df.append({**results_dict, **params}, ignore_index=True)
 
 df.to_pickle('experiment_results_' + datetime.datetime.now().strftime("%Y%m%d%H%M") + '.pkl')
+
+print("done")
