@@ -19,7 +19,7 @@
 %\floatplacement{figure}{H}
 \newcounter{problem}
 \newcounter{solution}
-\graphicspath{{/Users/edwardmcdugald/Research/convection_patterns/figs/}}
+\graphicspath{{/Users/edwardmcdugald/Research/convection_patterns/figs/}{/Users/edwardmcdugald/Research/convection_patterns/code/figs/sh_num_tsts_1018/}}
 \usepackage{chngcntr}
 \counterwithin*{section}{part}
 
@@ -484,11 +484,154 @@ convection_patterns_matlab/figs/mySH_tst_compare_2.png');
     \end{figure}
     \FloatBarrier
 \end{enumerate}
+\section{Further Code Cleanup}
+I needed to move the term $R-1$ into the non-linear update part of the code. Method is now like this...
+\begin{itemize}
+        \item We have the PDE
+        \[
+            w_t = -(1+\nabla^2)^2w + Rw - w^3.
+        \] 
+    \item
+        We can break this into a linear part and a non-linear part,
+        \[
+            W_t = L(w) + NL(w),
+        \] 
+        with
+        \begin{align*}
+            L(w) &= -(2\nabla^2+\nabla^4)w\\
+            NL(w) &=  (R-1)w- w^3.
+        \end{align*}
+         \item 
+        Basic procedure is as follows:
+        \begin{enumerate}[(i)]
+            \item Let $A = (-\nabla^4-2\nabla^2)$. Consider the pair of PDEs
+                \begin{align*}
+                    w_t &= Aw\\
+                    w_t &= (R-1)w-w^3.
+                \end{align*}
+            \item
+                Handling the linear and nonlinear PDEs separately, we get the relations
+                \begin{align*}
+                    w(t+\Delta t) &= \Delta t Aw(t)+w(t)\\
+                    \implies w(t+\Delta t) &\approx e^{A\Delta t}w(t).
+                \end{align*}
+                And for the nonlinear part,
+                \begin{align*}
+                    w(t+\Delta t) &\approx \Delta t \left[(R-1)w(t)-w(t)^3\right]+w(t).
+                \end{align*}.
+            \item Apply operator splitting (strang splitting) now
+            \end{enumerate}
+    \end{itemize}
+\section{Comparison with Chebfun}
+\subsection{Chebfun vs Python 1}
+\begin{verbatim}
+   >> dom = [-16 16 -16 16]
+   >> tspan = [0 10];
+   >> S = spinop2(dom, tspan)
+   >> S.lin = @(u) -2*lap(u)-biharm(u)
+   >> R = .5
+   >> S.nonlin = @(u) (R-1)*u - u.^3;
+   >> u0 = 1/20*chebfun2(@(x,y) cos(x) + sin(2*x) + sin(y) + cos(2*y), dom, 'trig');
+   u0 = u0 + chebfun2(@(x,y) exp(-((x-5*pi).^2 + (y-5*pi).^2)), dom, 'trig');
+   u0 = u0 + chebfun2(@(x,y) exp(-((x-5*pi).^2 + (y-15*pi).^2)), dom, 'trig');
+   u0 = u0 + chebfun2(@(x,y) exp(-((x-15*pi).^2 + (y-15*pi).^2)), dom, 'trig');
+   u0 = u0 + chebfun2(@(x,y) exp(-((x-15*pi).^2 + (y-5*pi).^2)), dom, 'trig');
+   u0 = u0 + chebfun2(@(x,y) exp(-((x-10*pi).^2 + (y-10*pi).^2)), dom, 'trig');
+   S.init = u0;
+   >> u = spin2(S, 256, .1, 'plot', 'off');
+   >> plot(u), view(0,90), axis equal, axis off
+   >> saveas(gcf,'/Users/edwardmcdugald/Research/
+   convection_patterns_matlab/figs/sh_tsts_1018/cf1.pdf');
+\end{verbatim}
+ \begin{figure}[ht]
+        \centering
+        \includegraphics[scale=.7]{cf1.pdf}
+        \caption{Chebfun SH 1}
+    \end{figure}
+\FloatBarrier
+\begin{verbatim}
+x = np.linspace(-16,16,256)
+y = np.linspace(-16,16,256)
+X,Y = np.meshgrid(x,y)
+w0 = (1./20.)*(np.cos(X)+np.sin(2*X)+np.sin(Y)+np.cos(2*Y))
+w0 = w0 + (np.exp(-((X-5*np.pi)**2 +(Y-5*np.pi)**2)))
+w0 = w0 + (np.exp(-((X-5*np.pi)**2 +(Y-15*np.pi)**2)))
+w0 = w0 + (np.exp(-((X-15*np.pi)**2 +(Y-15*np.pi)**2)))
+w0 = w0 + (np.exp(-((X-15*np.pi)**2 +(Y-5*np.pi)**2)))
+w0 = w0 + (np.exp(-((X-10*np.pi)**2 +(Y-10*np.pi)**2)))
+dt = .1
+R=.5
+L=x[len(x)-1]-x[0]
+nSteps = 100
+W1 = integrateSH(w0,R,dt,nSteps,L)
+fig1, ax1 = plt.subplots(nrows=1, ncols=1, figsize=(3,3))
+ax1.imshow(W1)
+plt.savefig("/Users/edwardmcdugald/Research/
+convection_patterns/code/figs/sh_num_tsts_1018/mySH1.pdf")
+\end{verbatim}
+ \begin{figure}[ht]
+        \centering
+        \includegraphics[scale=1.0]{mySH1.pdf}
+        \caption{My SH 1}
+    \end{figure}
+\FloatBarrier
 
-\textbf{Test 3- square from 0 to $20\pi$ , init is $.1(\cos(x)+\sin(y)+\exp(-((x-5\pi)^2+(y-5\pi)^2)))$, 200 time steps, $dt=1$, $R=.1$}
-\begin{enumerate}[(a)]
-    \item Results of my code
-\end{enumerate}
+\subsection{Chebfun vs Python 2}
+\begin{verbatim}
+dom = [0 20*pi 0 20*pi];
+tspan = [0 200];
+S = spinop2(dom, tspan);
+S.lin = @(u) -2*lap(u) - biharm(u);
+r = 1e-2; 
+S.nonlin = @(u) (-1 + r)*u - u.^3;
+u0 = 1/20*chebfun2(@(x,y) cos(x) + sin(2*x) + sin(y) + cos(2*y), dom, 'trig');
+u0 = u0 + chebfun2(@(x,y) exp(-((x-5*pi).^2 + (y-5*pi).^2)), dom, 'trig');
+u0 = u0 + chebfun2(@(x,y) exp(-((x-5*pi).^2 + (y-15*pi).^2)), dom, 'trig');
+u0 = u0 + chebfun2(@(x,y) exp(-((x-15*pi).^2 + (y-15*pi).^2)), dom, 'trig');
+u0 = u0 + chebfun2(@(x,y) exp(-((x-15*pi).^2 + (y-5*pi).^2)), dom, 'trig');
+u0 = u0 + chebfun2(@(x,y) exp(-((x-10*pi).^2 + (y-10*pi).^2)), dom, 'trig');
+S.init = u0;
+plot(S.init), view(0,90), axis equal, axis off
+u = spin2(S, 96, 2e-1, 'plot', 'off');
+plot(u), view(0,90), axis equal, axis off
+>> saveas(gcf,'/Users/edwardmcdugald/Research/
+convection_patterns_matlab/figs/sh_tsts_1018/cf2.pdf');  
+\end{verbatim}
+ \begin{figure}[ht]
+        \centering
+        \includegraphics[scale=.7]{cf2.pdf}
+        \caption{Chebfun SH 2}
+    \end{figure}
+\FloatBarrier
+\begin{verbatim}
+x = np.linspace(0,20*np.pi,96)
+y = np.linspace(0,20*np.pi,96)
+X,Y = np.meshgrid(x,y)
+w0 = (1./20.)*(np.cos(X)+np.sin(2*X)+np.sin(Y)+np.cos(2*Y))
+w0 = w0 + (np.exp(-((X-5*np.pi)**2 +(Y-5*np.pi)**2)))
+w0 = w0 + (np.exp(-((X-5*np.pi)**2 +(Y-15*np.pi)**2)))
+w0 = w0 + (np.exp(-((X-15*np.pi)**2 +(Y-15*np.pi)**2)))
+w0 = w0 + (np.exp(-((X-15*np.pi)**2 +(Y-5*np.pi)**2)))
+w0 = w0 + (np.exp(-((X-10*np.pi)**2 +(Y-10*np.pi)**2)))
+fig, ax = plt.subplots(nrows=1, ncols=1, figsize=(3,3))
+ax.imshow(w0)
+dt = 2e-1
+R= 1e-2
+L=x[len(x)-1]-x[0]
+nSteps = 1000
+W2 = integrateSH(w0,R,dt,nSteps,L)
+fig2, ax2 = plt.subplots(nrows=1, ncols=1, figsize=(3,3))
+ax2.imshow(W2)
+plt.savefig("/Users/edwardmcdugald/Research/
+convection_patterns/code/figs/sh_num_tsts_1018/mySH2.pdf")
+\end{verbatim}
+ \begin{figure}[ht]
+        \centering
+        \includegraphics[scale=1.0]{mySH2.pdf}
+        \caption{My SH 2}
+    \end{figure}
+\FloatBarrier
+
 
 \end{document}
 

@@ -3,15 +3,14 @@ import mySH_v1 as mySh
 import matplotlib.pyplot as plt
 import utils
 
-
 x = np.linspace(-16,16,256)
 y = np.linspace(-16,16,256)
 X,Y = np.meshgrid(x,y)
 w0 = .1*(np.cos(X)+np.sin(Y))
 dt = .1
-R = np.real(-np.tanh(np.sqrt(X**2+2*y*2-256.))+.5)
-print('debug')
+R = 5*(-1./(1.+np.exp(-(X**2+2*Y**2-220.)))+1.)
 L=x[len(x)-1]-x[0]
+
 nSteps = 100
 W10 = mySh.integrateSH(w0,R,dt,nSteps,L)
 fig1, ax1 = plt.subplots(nrows=1, ncols=1, figsize=(3,3))
