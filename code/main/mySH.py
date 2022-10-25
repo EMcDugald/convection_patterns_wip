@@ -28,7 +28,7 @@ def integrateSH(w0,R,dt,nSteps,L):
          if i%100 == 0:
              print("step number:",i)
          w1 = np.real(sp.fft.ifft2(np.exp(A*.5*dt)*sp.fft.fft2(w0)))
-         k1 = dt*w1
+         k1 = dt*non_lin_rhs(w1, R)
          k2 = dt*non_lin_rhs(w1+.5*k1, R)
          k3 = dt*non_lin_rhs(w1+.5*k2, R)
          k4 = dt*non_lin_rhs(w1+k3, R)

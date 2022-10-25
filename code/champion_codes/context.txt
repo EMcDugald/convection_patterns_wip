@@ -1,2 +1,0 @@
-This code is from Kathleen Champions work:
-https://github.com/kpchamp/SindyAutoencoders
