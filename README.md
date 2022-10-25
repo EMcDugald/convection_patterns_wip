@@ -18,7 +18,6 @@ We propose to apply methods outlined by Kutz et. al. for parsimonious model disc
 We aim to first "rediscover" the Swift-Hohenberg PDE using a simple spare regression algorithm, applied to numerical simulations, with a library of candidate functions and derivative terms.
 Upon rediscovery of Swift-Hohenberg, we plan to add an autoencoder neural network to the sparse regression, in the hopes of recovering a PDE in terms of the phase variable.
 
-Convection Roll Examples:
 <img width="502" alt="convection_roll_examples" src="https://user-images.githubusercontent.com/55065632/197681167-c628b541-6ae4-4bb4-92be-aaed471f6ac2.png">
 
 
