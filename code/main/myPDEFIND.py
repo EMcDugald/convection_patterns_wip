@@ -6,7 +6,24 @@ from scipy.sparse import dia_matrix
 import scipy as sp
 import itertools
 import operator
+from scipy.fft import fft2, ifft2, fftfreq
 
+
+def myPolyDiffPoint(u, x, deg=3, diff=1):
+    """
+    Fits a chebyshev polynomial to the data, and
+    takes the derivative. Using this for u_t estimates
+    u = values of some function
+    x = x-coordinates where values are known
+    deg = degree of polynomial to use
+    diff = maximum order derivative we want
+    """
+    n = len(x)
+    index = (n - 1) // 2
+    # Fit to a polynomial
+    poly = np.polynomial.chebyshev.Chebyshev.fit(x, u, deg)
+    # Take derivative
+    return poly.deriv(m=1)(x[index])
 
 def PolyDiffPoint(u, x, deg=3, diff=1, index=None):
     """
@@ -30,25 +47,44 @@ def PolyDiffPoint(u, x, deg=3, diff=1, index=None):
 
     return derivatives
 
-def Laplacian(func,Lx,Ly):
-    ny, nx = np.shape(func)
-    kx = (2. * np.pi /Lx)*sp.fft.fftfreq(nx, 1. / nx)
-    ky = (2. * np.pi /Ly)*sp.fft.fftfreq(ny, 1. / ny)
-    Kx, Ky = np.meshgrid(kx, ky)
-    fourierLaplacian = -(Kx ** 2 + Ky ** 2)
-    lap = np.real(sp.fft.ifft2(fourierLaplacian*sp.fft.fft2(func)))
-    return lap
-
-
-def Biharmonic(func,Lx,Ly):
+def SpectralDerivs(func,Lx,Ly,type='x'):
+    """
+    :param func: function values
+    :param Lx: length of rectangle in x direction
+    :param Ly: length of rectangle in y direction
+    :param type: derivative type. can use 'x', 'xx', 'y',
+    'yy', 'xy', 'xx', 'yy', 'xxyy', 'xxxx', 'yyyy',
+    'laplacian', 'biharmonic'
+    :return: grid of derivative values
+    """
     ny, nx = np.shape(func)
     kx = (2. * np.pi / Lx) * sp.fft.fftfreq(nx, 1. / nx)
     ky = (2. * np.pi / Ly) * sp.fft.fftfreq(ny, 1. / ny)
     Kx, Ky = np.meshgrid(kx, ky)
-    fourierLaplacian = -(Kx ** 2 + Ky ** 2)
-    fourierBiharm = fourierLaplacian*fourierLaplacian
-    biharm = np.real(sp.fft.ifft2(fourierBiharm * sp.fft.fft2(func)))
-    return biharm
+    if type == 'x':
+        return 'x'
+    elif type == 'xx':
+        return 'xx'
+    elif type == 'y':
+        return 'y'
+    elif type == 'yy':
+        return 'yy'
+    elif type == 'xy':
+        return 'xy'
+    elif type == 'yy':
+        return 'yy'
+    elif type == 'xxyy':
+        return 'xxyy'
+    elif type == 'xxxx':
+        return 'xxxx'
+    elif type == 'yyyy':
+        return 'yyyy'
+    elif type == 'laplacian':
+        return 'laplacian'
+    elif type == 'biharmonic':
+        return 'biharmonic'
+    else:
+        raise Exception("Incompatible type selection")
 
 
 def build_Theta(data, derivatives, derivatives_description, P, data_description=None):
