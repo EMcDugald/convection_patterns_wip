@@ -3,159 +3,9 @@ from numpy import linalg as LA
 import scipy.sparse as sparse
 from scipy.sparse import csc_matrix
 from scipy.sparse import dia_matrix
+import scipy as sp
 import itertools
 import operator
-
-"""
-A few functions used in PDE-FIND
-Samuel Rudy.  2016
-"""
-
-
-##################################################################################
-##################################################################################
-#
-# Functions for taking derivatives.
-# When in doubt / nice data ===> finite differences
-#               \ noisy data ===> polynomials
-#
-##################################################################################
-##################################################################################
-
-def TikhonovDiff(f, dx, lam, d=1):
-    """
-    Tikhonov differentiation.
-    return argmin_g \|Ag-f\|_2^2 + lam*\|Dg\|_2^2
-    where A is trapezoidal integration and D is finite differences for first dervative
-    It looks like it will work well and does for the ODE case but
-    tends to introduce too much bias to work well for PDEs.  If the data is noisy, try using
-    polynomials instead.
-    """
-
-    # Initialize a few things
-    n = len(f)
-    f = np.matrix(f - f[0]).reshape((n, 1))
-
-    # Get a trapezoidal approximation to an integral
-    A = np.zeros((n, n))
-    for i in range(1, n):
-        A[i, i] = dx / 2
-        A[i, 0] = dx / 2
-        for j in range(1, i): A[i, j] = dx
-
-    e = np.ones(n - 1)
-    D = sparse.diags([e, -e], [1, 0], shape=(n - 1, n)).todense() / dx
-
-    # Invert to find derivative
-    g = np.squeeze(np.asarray(np.linalg.lstsq(A.T.dot(A) + lam * D.T.dot(D), A.T.dot(f), rcond=None)[0]))
-
-    if d == 1:
-        return g
-
-    # If looking for a higher order derivative, this one should be smooth so now we can use finite differences
-    else:
-        return FiniteDiff(g, dx, d - 1)
-
-
-def FiniteDiff(u, dx, d):
-    """
-    Takes dth derivative data using 2nd order finite difference method (up to d=3)
-    Works but with poor accuracy for d > 3
-
-    Input:
-    u = data to be differentiated
-    dx = Grid spacing.  Assumes uniform spacing
-    """
-
-    n = u.size
-    ux = np.zeros(n, dtype=np.complex64)
-
-    if d == 1:
-        for i in range(1, n - 1):
-            ux[i] = (u[i + 1] - u[i - 1]) / (2 * dx)
-
-        ux[0] = (-3.0 / 2 * u[0] + 2 * u[1] - u[2] / 2) / dx
-        ux[n - 1] = (3.0 / 2 * u[n - 1] - 2 * u[n - 2] + u[n - 3] / 2) / dx
-        return ux
-
-    if d == 2:
-        for i in range(1, n - 1):
-            ux[i] = (u[i + 1] - 2 * u[i] + u[i - 1]) / dx ** 2
-
-        ux[0] = (2 * u[0] - 5 * u[1] + 4 * u[2] - u[3]) / dx ** 2
-        ux[n - 1] = (2 * u[n - 1] - 5 * u[n - 2] + 4 * u[n - 3] - u[n - 4]) / dx ** 2
-        return ux
-
-    if d == 3:
-        for i in range(2, n - 2):
-            ux[i] = (u[i + 2] / 2 - u[i + 1] + u[i - 1] - u[i - 2] / 2) / dx ** 3
-
-        ux[0] = (-2.5 * u[0] + 9 * u[1] - 12 * u[2] + 7 * u[3] - 1.5 * u[4]) / dx ** 3
-        ux[1] = (-2.5 * u[1] + 9 * u[2] - 12 * u[3] + 7 * u[4] - 1.5 * u[5]) / dx ** 3
-        ux[n - 1] = (2.5 * u[n - 1] - 9 * u[n - 2] + 12 * u[n - 3] - 7 * u[n - 4] + 1.5 * u[n - 5]) / dx ** 3
-        ux[n - 2] = (2.5 * u[n - 2] - 9 * u[n - 3] + 12 * u[n - 4] - 7 * u[n - 5] + 1.5 * u[n - 6]) / dx ** 3
-        return ux
-
-    if d > 3:
-        return FiniteDiff(FiniteDiff(u, dx, 3), dx, d - 3)
-
-
-def ConvSmoother(x, p, sigma):
-    """
-    Smoother for noisy data
-
-    Inpute = x, p, sigma
-    x = one dimensional series to be smoothed
-    p = width of smoother
-    sigma = standard deviation of gaussian smoothing kernel
-    """
-
-    n = len(x)
-    y = np.zeros(n, dtype=np.complex64)
-    g = np.exp(-np.power(np.linspace(-p, p, 2 * p), 2) / (2.0 * sigma ** 2))
-
-    for i in range(n):
-        a = max([i - p, 0])
-        b = min([i + p, n])
-        c = max([0, p - i])
-        d = min([2 * p, p + n - i])
-        y[i] = np.sum(np.multiply(x[a:b], g[c:d])) / np.sum(g[c:d])
-
-    return y
-
-
-def PolyDiff(u, x, deg=3, diff=1, width=5):
-    """
-    u = values of some function
-    x = x-coordinates where values are known
-    deg = degree of polynomial to use
-    diff = maximum order derivative we want
-    width = width of window to fit to polynomial
-    This throws out the data close to the edges since the polynomial derivative only works
-    well when we're looking at the middle of the points fit.
-    """
-
-    u = u.flatten()
-    x = x.flatten()
-
-    n = len(x)
-    du = np.zeros((n - 2 * width, diff))
-
-    # Take the derivatives in the center of the domain
-    for j in range(width, n - width):
-
-        # Note code originally used an even number of points here.
-        # This is an oversight in the original code fixed in 2022.
-        points = np.arange(j - width, j + width + 1)
-
-        # Fit to a polynomial
-        poly = np.polynomial.chebyshev.Chebyshev.fit(x[points], u[points], deg)
-
-        # Take derivatives
-        for d in range(1, diff + 1):
-            du[j - width, d - 1] = poly.deriv(m=d)(x[j])
-
-    return du
 
 
 def PolyDiffPoint(u, x, deg=3, diff=1, index=None):
@@ -180,14 +30,26 @@ def PolyDiffPoint(u, x, deg=3, diff=1, index=None):
 
     return derivatives
 
+def Laplacian(func,Lx,Ly):
+    ny, nx = np.shape(func)
+    kx = (2. * np.pi /Lx)*sp.fft.fftfreq(nx, 1. / nx)
+    ky = (2. * np.pi /Ly)*sp.fft.fftfreq(ny, 1. / ny)
+    Kx, Ky = np.meshgrid(kx, ky)
+    fourierLaplacian = -(Kx ** 2 + Ky ** 2)
+    lap = np.real(sp.fft.ifft2(fourierLaplacian*sp.fft.fft2(func)))
+    return lap
 
-##################################################################################
-##################################################################################
-#
-# Functions specific to PDE-FIND
-#
-##################################################################################
-##################################################################################
+
+def Biharmonic(func,Lx,Ly):
+    ny, nx = np.shape(func)
+    kx = (2. * np.pi / Lx) * sp.fft.fftfreq(nx, 1. / nx)
+    ky = (2. * np.pi / Ly) * sp.fft.fftfreq(ny, 1. / ny)
+    Kx, Ky = np.meshgrid(kx, ky)
+    fourierLaplacian = -(Kx ** 2 + Ky ** 2)
+    fourierBiharm = fourierLaplacian*fourierLaplacian
+    biharm = np.real(sp.fft.ifft2(fourierBiharm * sp.fft.fft2(func)))
+    return biharm
+
 
 def build_Theta(data, derivatives, derivatives_description, P, data_description=None):
     """
