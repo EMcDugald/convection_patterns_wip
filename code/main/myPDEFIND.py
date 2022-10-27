@@ -9,7 +9,7 @@ import operator
 from scipy.fft import fft2, ifft2, fftfreq
 
 
-def myPolyDiffPoint(u, x, deg=3, diff=1):
+def PolyDiffPoint(u, x, deg=3, diff=1):
     """
     Fits a chebyshev polynomial to the data, and
     takes the derivative. Using this for u_t estimates
@@ -25,64 +25,53 @@ def myPolyDiffPoint(u, x, deg=3, diff=1):
     # Take derivative
     return poly.deriv(m=1)(x[index])
 
-def PolyDiffPoint(u, x, deg=3, diff=1, index=None):
+def BackwardDiff(u_curr, u_past, dt):
     """
-    Same as above but now just looking at a single point
-    u = values of some function
-    x = x-coordinates where values are known
-    deg = degree of polynomial to use
-    diff = maximum order derivative we want
+    :param u_curr: current time func values
+    :param u_past: previous time func values
+    :param dt: time step
+    :return: backward finite diff approximation
     """
+    return (u_curr - u_past)/dt
 
-    n = len(x)
-    if index == None: index = (n - 1) // 2
-
-    # Fit to a polynomial
-    poly = np.polynomial.chebyshev.Chebyshev.fit(x, u, deg)
-
-    # Take derivatives
-    derivatives = []
-    for d in range(1, diff + 1):
-        derivatives.append(poly.deriv(m=d)(x[index]))
-
-    return derivatives
 
 def SpectralDerivs(func,Lx,Ly,type='x'):
     """
     :param func: function values
-    :param Lx: length of rectangle in x direction
-    :param Ly: length of rectangle in y direction
-    :param type: derivative type. can use 'x', 'xx', 'y',
-    'yy', 'xy', 'xx', 'yy', 'xxyy', 'xxxx', 'yyyy',
+    :param Lx: length of rectangle in x dir
+    :param Ly: length of rectangle in y dir
+    :param type: derivative type: 'x', 'xx',
+    'y', 'yy', 'xy', 'xxyy', 'xxxx', 'yyyy',
     'laplacian', 'biharmonic'
     :return: grid of derivative values
     """
     ny, nx = np.shape(func)
-    kx = (2. * np.pi / Lx) * sp.fft.fftfreq(nx, 1. / nx)
-    ky = (2. * np.pi / Ly) * sp.fft.fftfreq(ny, 1. / ny)
+    kx = (2.*np.pi/Lx)*fftfreq(nx,1./nx)
+    ky = (2.*np.pi/Ly)*fftfreq(ny,1./ny)
     Kx, Ky = np.meshgrid(kx, ky)
     if type == 'x':
-        return 'x'
+        return np.real(ifft2(1j*Kx*fft2(func)))
     elif type == 'xx':
-        return 'xx'
+        return np.real(ifft2((1j*Kx)**2*fft2(func)))
     elif type == 'y':
-        return 'y'
+        return np.real(ifft2(1j*Ky*fft2(func)))
     elif type == 'yy':
-        return 'yy'
+        return np.real(ifft2((1j*Ky)**2*fft2(func)))
     elif type == 'xy':
-        return 'xy'
-    elif type == 'yy':
-        return 'yy'
+        return np.real(ifft2((1j*Ky)*(1j*Kx)*fft2(func)))
     elif type == 'xxyy':
-        return 'xxyy'
+        return np.real(ifft2((1j*Ky)**2*(1j*Kx)**2*fft2(func)))
     elif type == 'xxxx':
-        return 'xxxx'
+        return np.real(ifft2((1j*Kx)**4*fft2(func)))
     elif type == 'yyyy':
-        return 'yyyy'
+        return np.real(ifft2((1j*Ky)**4*fft2(func)))
     elif type == 'laplacian':
-        return 'laplacian'
+        fourierLaplacian = -(Kx**2+Ky**2)
+        return np.real(ifft2(fourierLaplacian*fft2(func)))
     elif type == 'biharmonic':
-        return 'biharmonic'
+        fourierLaplacian = -(Kx**2+Ky**2)
+        fourierBiharm = fourierLaplacian*fourierLaplacian
+        return np.real(ifft2(fourierBiharm*fft2(func)))
     else:
         raise Exception("Incompatible type selection")
 
