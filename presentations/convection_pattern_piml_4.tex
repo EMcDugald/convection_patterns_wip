@@ -4,7 +4,7 @@
 \usepackage{amsmath,bm}
 \graphicspath{{/Users/edwardmcdugald/Research/convection_patterns_wip/figs/pres4/}}
 
-\title{Universal of Model of Nonlinear Pattern Forming PDEs in terms of the Phase Parameter}
+\title{Finding a Universal Model of Nonlinear Pattern Forming PDEs in terms of the Phase Parameter}
 \author{Edward McDugald}
 \institute{University of Arizona}
 \date{\today}
@@ -92,14 +92,19 @@
     \frametitle{PDE Discovery via Sparse Optimization}
 \begin{itemize}
   \item I combined ideas from Kutz et. al. and Hayden Schaeffer for finding governing equations via sparse regression.
-  \item Suppose we have access to solutions $u(x,y,t)$ on a spatio-temporal grid, and in addition, we are able to estimate time derivatives for each solution, $u_t(x,y,t)$. 
+  \item Suppose we have access to solutions $u(x,y,t)$ on a spatio-temporal grid, and in addition, we are able to estimate time derivatives for each solution, $u_t(x,y,t)$. Let us collect the time derivatives one vector, $U_t$.
 \item 
     We can then form a feature matrix of tall, skinny feature vectors:
     \[
         F_u(t) = \begin{bmatrix}| & | & | & | & | & | & | & | & \dots\\
-                                1 & u & u^2 & u_x & u_x^2 & uu_x & u_xx &\dots\\
+            1 & u & u^2 & u_x & u_x^2 & uu_x & u_xx & u_xx & \dots\\
                                 | & | & | & | & | & | & | & | & \dots
                  \end{bmatrix}
+    \] 
+\item 
+    We then approximate a solution of
+    \[
+        \xi = \text{argmin}\|F_u(t)\xi - U_t\|_2^2 + \lambda \|\xi\|_0
     \] 
 \end{itemize}
 \end{frame}
@@ -107,13 +112,44 @@
 \begin{frame}
      \frametitle{"Discovering" Swift Hohenberg}
      \begin{itemize}
-         \item I used Operator Splitting and Exponential Time Differencing to obtain numerical solutions of Swift-Hohenberg.
-             \[
-                 u_t = -\Delta^2 u - 2\Delta u + (R-1)u - u^3.
-             \] 
-        \item I combined ideas from Kutz et. al. and Hayden Schaeffer for finding governing equations via sparse regression.
-        \item I generated my data for $(x,y) \in [-25\pi,25\pi]^2$, and $t \in [0,100]$, with $256$ spatial discretizations and $200$ time steps.
+         \item I used Operator Splitting and Exponential Time Differencing to obtain numerical solutions of Swift-Hohenberg $u_t = -\Delta^2 u - 2\Delta u + (R-1)u - u^3.$ 
+        \item I used backward finite differences for my time derivatives, and spectral derivatives for all spatial derivatives.
+        \item I used a "coarse" grid for sampling. Ie, I took 20 time steps, and down sampled the spatial grids by a factor of 8.
+        \item I used Sequentially Thresholded Ridge Regression. This is an iterative method which solve $\xi = \text{argmin}\|F_u(t)\xi-U_t\|_2^2 + \lambda \|\xi\|_2^2$ at each step, and applies a "hard" threshold to coefficients below a certain size, before repeating. The threshold tolerance is determined empirically by using an 80/20 test/train split. We used $\lambda = 1e-5$.
      \end{itemize}
+\end{frame}
+
+\begin{frame}
+     \frametitle{"Discovering" Swift Hohenberg cont.}
+     \begin{itemize}
+         \item \href{https://github.com/EMcDugald/convection_patterns_wip/blob/master/code/ml_experiments/my_experiments/phase_surface.ipynb}{Notebook Demo}
+     \end{itemize}
+      \begin{figure}
+        \centering
+        \includegraphics[scale=0.25]{SH2.png}
+        \end{figure}
+ \begin{figure}
+        \centering
+        \includegraphics[scale=0.25]{STR.png}
+        \end{figure}
+\end{frame}
+
+\begin{frame}
+     \frametitle{Next Steps}
+     \begin{itemize}
+         \item Having successfully "rediscovered" Swift-Hohenberg, I am ready to extend the method to analysze the Cross-Newell Equation.
+        \item A simple first experiment would be to generate Swift-Hohenberg solutions that obey the restrictions imposed in the Cross-Newell derivation. If I can generate phase surfaces from the solutions, I can run the experiment on the phase surfaces, and see if such an experiment predicts Cross-Newell.
+        \item It would be neat to derive Cross-Newell, or a variant of it, directly from termperature surface simulations. I am wondering if there is a way to combine a neural network, or other machine learning technique to make this work.
+        \item First step is to find a reliable method for estimating phase surfaces, and return to the mathematical analysis to understand the Cross-Newell limitations.
+     \end{itemize}
+\end{frame}
+
+\begin{frame}
+     \frametitle{Phase Surface Depiction}
+      \begin{figure}
+        \centering
+        \includegraphics[scale=0.5]{SH3.png}
+        \end{figure}
 \end{frame}
 
 
