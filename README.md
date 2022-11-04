@@ -15,8 +15,8 @@ The CN equation is limited in its ability to predict defects. Thus, we seek a mo
 The analysis to date has relied on "classical" methods of PDEs, asymptotics, and geometry. This project aims to solve the problem using a data-driven approach.
 We propose to apply methods outlined by Kutz et. al. for parsimonious model discovery, broadly described as a "SINDy" framework. 
 
-We aim to first "rediscover" the Swift-Hohenberg PDE using a simple spare regression algorithm, applied to numerical simulations, with a library of candidate functions and derivative terms.
-Upon rediscovery of Swift-Hohenberg, we plan to add an autoencoder neural network to the sparse regression, in the hopes of recovering a PDE in terms of the phase variable.
+I aim to first "rediscover" the Swift-Hohenberg PDE using a simple spare regression algorithm, applied to numerical simulations, with a library of candidate functions and derivative terms.
+Upon rediscovery of Swift-Hohenberg, I plan to generate phase surfaces, and concoct similar experiments for the phase equation.
 
 <img width="502" alt="convection_roll_examples" src="https://user-images.githubusercontent.com/55065632/197681167-c628b541-6ae4-4bb4-92be-aaed471f6ac2.png">
 
