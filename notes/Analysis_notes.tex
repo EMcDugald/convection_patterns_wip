@@ -93,9 +93,68 @@
             \beta_X &= -l\sin\psi\\
             \beta_Y &= l\cos\psi.
         \end{align*}
-        Note that the Jacobian of the transformation from $(\alpha,\beta)$ to $(X,Y)$ is $kl$ \textbf{why??? does $\alpha_X$ mean first component of $\alpha$, or derivative with respect to $X$}.\newline
-        The curves $\alpha(X,Y)=\text{constant}$ are the loci of constant phase, while the $\beta$ coordinates are the orthogonal trajectories, and measure the distance along the rolls. The curvature $\kappa_{\alpha}$ of $\alpha(X,Y)=\text{const}$ is given by .
-
+        Note that the Jacobian of the transformation from $(\alpha,\beta)$ to $(X,Y)$ is $kl$ \newline
+        The curves $\alpha(X,Y)=\text{constant}$ are the loci of constant phase, while the $\beta$ coordinates are the orthogonal trajectories, and measure the distance along the rolls. The curvature $\kappa_{\alpha}$ of $\alpha(X,Y)=\text{const}$ is given by $l\psi_{\beta}$. The curvature of constant $\beta$ curves is $-k\psi_{\alpha}$.
+        In these coordinates, the compatibility conditions $m_Y=n_X$ gives
+        \begin{align*}
+            \kappa_{\alpha} &= -(k/l)l_{\alpha}\\
+            \kappa_{\beta} &= -(l/k)k_{\beta}\\
+            k\partial_{\alpha}\Theta_T &= k_T\\
+            l\partial_{\beta}\Theta_T &= k\psi_T.
+        \end{align*}
+        The following is also useful:
+        \begin{gather*}
+            \Delta w(\theta,X,Y,T) = (k^2\partial^2_{\theta}+\eta^2D_1\partial_{\theta}+\eta^4D_2)w\\
+            D_1 = 2\bm{k}\cdot\nabla + (\nabla \cdot \bm{k}) = 2k^2\partial_{\alpha}+kk_{\alpha}+kl\psi_{\beta}\\
+            D_2 = \nabla^2 = (k\partial_{\alpha})+(l\partial_{\beta})^2+\kappa_{\alpha}k\partial_{\alpha}+\kappa_{\beta}l\partial_{\beta}.
+        \end{gather*}
+        At order $\eta^0$ we recover the fully nonlinear solution
+        \[
+            w^{(0)} = w_0 = Ae^{i\theta}; \quad \theta=\bm{k} \cdot x
+        \] 
+        with eikonal equation
+        \[
+            R-A^2 = (k^2-1)^2.
+        \] 
+        At each successive order we obtain linear equations for the iterates $w^{(p)}$,
+        \[
+            \delta O_f \cdot w^{(p)} = F^{(p)}, \quad (5)
+        \] 
+        where $\delta O_f$ is the operator obtained by linearizing the nonlinear ODE in $\theta$ about the solution $w=f$. The right hand sides of this equations are variables of the slow variations of $\bm{k}$ and $A$. \newline
+        We only allow solutions to (5) which are bounded and $2\pi$ periodic in $\theta$. It is necessary to suppress certain secular terms in $F^{(p)}$ which means eliminating components in $F^{(p)}$ which belong to the null space of $\delta O_f$. For SH, $F^{(p)} = G^{(p)}e^{i\theta}$, so we simply require that 
+        \[
+            \text{Im}G^{(p)}=0. \quad (6)
+        \] 
+        Equation (6) governs the slow changes in the phase. After imposing (6), we can then solve (5) for $w^{(p)}$, and pbtain
+        \[
+            w^{(p)} \propto \frac{\text{Re}G^{(p)}}{A^2}e^{i\theta}. \quad (7)
+        \] 
+        For order one $A$, this is acceptable. However, this makes it difficult to pass to the small $A$ limit which is what happens as $R \rightarrow R_c$. To develop a theory valid for all $A$, we remove the secular terms by choosing the iterates in an asymptotic expansion of the eikonal equation,
+        \[
+            R-A^2 = R_0+v^2R_2+\dots. \quad (8)
+        \] 
+        It turns out that $R_0 = (k^2-1)^2$, $R_2 = 0$, $R_4$ involves terms like $A_T/A, A_{XX}/A$, etc. For $A$ of order unity, $R-R_c = \mathcal{O}(1)$, the terms $R_4, R_6,\dots$ are uniformly bounded, and to leading order, the amplitude $A$ is determined algebraically by the amplitude of the phase gradient $k$. \newline
+        On the other hand, when $A$ is small, say order $\eta^2$ whence $R-R_c = \mathcal{O}(\eta^4)$, then $R-A^2(1-vk^2)-R_0$ is also $\mathcal{O}(\eta^4)$ and balances $R_4$. This then gives a PDE for $A$. \newline
+        The benefit of this approach is that it provides a situation where everything can be computed explicitly. Choosing the members of the sequence $R_{2p}$ so as to remove the terms on the RHS of (5) of the form $(\text{Re}G^{(p)})e^{i\theta}$ and by choosing members of the sequence $\sigma_{2p}$ such that $\Theta_T=\sigma_0 + \eta^2\sigma_2+\dots$ in order to remove the terms $(\text{Im}G^{(p)})e^{i\theta}$ we are left with $w^{(p)}=0$. \newline
+        Note that for $A$ of order $1$, the nullspace of $\delta O_f$ is one dimensional and spanned by $ie^{i\theta}$. Consequently, one obtains only one equation involving $k$ and $A$, the phase equation. The eikonal equation, obtained at the order one balance, and the fact that $\nabla \times \bm{k}=0$, close the system. In the limit $A \rightarrow 0$, the nullspace of $\delta O_f$ doubles and is now spanned by $(1,i)e^{i\theta}$. This generates two relations for $A$ and $k$. The first is again the phase equation. The second replaces the eikonal equation with a differential equation for $A(X,Y,T)$. Again $\nabla \times k=0$ completes the system. 
+        The following can be derived by substituting $w=Ae^{i\theta}$ into SH, and making appropriate choices for $\{R^{2p}\}, \{\sigma_{2p}\}$. 
+        \begin{gather*}
+            \delta O_f = \{(k^2\partial^2_{\theta})^2-R_0+2ff^{*}\}w+f^2w^{*}\\
+            F^{(1)} = i\{-\sigma_0 + D_1(k^2-1) + (k^2-1)D_1\}Ae^{i\theta}+R_2\cdot Ae^{i\theta},
+        \end{gather*}
+    from which we obtain $R_2=0$ and
+    \[
+        A \Theta_T -D_1(k^2-1)A - (k^2-1)D_1A = 0. \quad (9)
+    \] 
+    The corrections to (8) are $\mathcal{O}(\eta^4)$. We can rewrite (8) as 
+    \[
+        \tau(k)\Theta_T = -\nabla \cdot \left[\bm{k}B(k)\right] = -\partial_{\alpha}\left(\frac{kB(k)}{l}\right), \quad (10)
+    \] 
+    with
+    \[
+        \tau(k) = A^2, \quad B(k) = A^2\frac{d a^2}{dk^2}, \quad (11)
+    \] 
+    where $A^2$ is a function of $k^2$ through (8).
 
 \end{itemize}
 
