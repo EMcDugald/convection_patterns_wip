@@ -69,7 +69,7 @@ for j in range(len(t)-1):
 
 
 mdict={"t":t,"x":x,"y":y,"u":u,"v":v}
-savemat("/Users/edwardmcdugald/Research/convection_patterns/code/data/rd2.mat",mdict)
+savemat("/Users/edwardmcdugald/Research/convection_patterns/code/data/rd.mat",mdict)
 
 
 

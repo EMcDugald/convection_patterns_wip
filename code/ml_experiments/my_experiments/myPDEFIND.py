@@ -208,10 +208,3 @@ def STRidge(X0, y, lam, maxit, tol, normalize=2, print_results=False):
         return np.multiply(Mreg, w)
     else:
         return w
-
-def douglas_rachford(time_der,features,lam,gamma=.5,mu=1.):
-    coeffs = np.ones(len(features))
-    H1 = lam*np.linalg.norm(coeffs,ord=1)
-    H2 = .5*np.sum(np.linalg.norm(tim_der-features*ceoffs))
-    prox_H1 = np.max(np.abs(coeffs)-gamma)
-    return coeffs

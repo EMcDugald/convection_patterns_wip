@@ -1,4 +1,0 @@
-Some things to consider
-1) Can either sample random points in space, for a range of time points, and build regression problem
-from those values - this is the approach outline be Kutz. Alternatively, one can generate a coarse grid
-and use backward differences to estimate the time derivative- this is Schaefer's approach.
