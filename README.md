@@ -12,11 +12,7 @@ the phase changes slowly over most of the convecting cell, however the phase cha
 
 The CN equation is limited in its ability to predict defects. Thus, we seek a modification of it, perhaps in the form of an additional term, which is capable of capturing more defects.
 
-The analysis to date has relied on "classical" methods of PDEs, asymptotics, and geometry. This project aims to solve the problem using a data-driven approach.
-We propose to apply methods outlined by Kutz et. al. for parsimonious model discovery, broadly described as a "SINDy" framework. 
-
-I aim to first "rediscover" the Swift-Hohenberg PDE using a simple spare regression algorithm, applied to numerical simulations, with a library of candidate functions and derivative terms.
-Upon rediscovery of Swift-Hohenberg, I plan to generate phase surfaces, and concoct similar experiments for the phase equation.
+We propose a joint optimization procedure involving an autoencoder and a sparse regression to discover reduced order models in terms of the phase of the pattern.
 
 <img width="502" alt="convection_roll_examples" src="https://user-images.githubusercontent.com/55065632/197681167-c628b541-6ae4-4bb4-92be-aaed471f6ac2.png">
 
