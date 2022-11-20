@@ -83,7 +83,7 @@ def solveSH(Lx,Ly,Nx,Ny,h,tmax,filename,Rscale=.5,beta=.45,amplitude=.1,init_fla
     uu = np.zeros((Nx,Ny,nmax+1))
     ee = np.zeros((Nx,Ny,nmax+1))
     uu[:, :, 0] = u0
-    ee[:,:,0] = edensity(xi,eta,u0,ind,R)
+    ee[:, :, 0] = edensity(xi,eta,u0,ind,R)
     tt[0] = 0
     ii = 0
     start = time.time()
@@ -105,10 +105,9 @@ def solveSH(Lx,Ly,Nx,Ny,h,tmax,filename,Rscale=.5,beta=.45,amplitude=.1,init_fla
 
         uu[:, :, ii + 1] = u0
         tt[ii + 1] = t
-        ii = ii + 1
-
         if energy:
-            ee[:,:,ii+1] = edensity(xi,eta,u0,ind,R)
+            ee[:, :, ii+1] = edensity(xi,eta,u0,ind,R)
+        ii = ii + 1
 
 
     end = time.time()
