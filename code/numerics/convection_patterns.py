@@ -2,7 +2,7 @@ import numpy as np
 import scipy as sp
 import time
 
-def solveSH(Lx,Ly,Nx,Ny,h,tmax,filename,r=.5,beta=.45,amplitude=.1,init_flag=1):
+def solveSH(Lx,Ly,Nx,Ny,h,tmax,filename,Rscale=.5,beta=.45,amplitude=.1,init_flag=1,energy=True):
     '''
     :param Lx: container length in x direction
     :param Ly: container length in y direction
@@ -24,9 +24,9 @@ def solveSH(Lx,Ly,Nx,Ny,h,tmax,filename,r=.5,beta=.45,amplitude=.1,init_flag=1):
 
     # set R function, if init_flag=3, we are on an ellipse
     if init_flag==3:
-        R = r*np.tanh(np.sqrt(Lx**2+Ly**2)*(beta-np.sqrt((X/Lx)**2+(Y/Ly)**2))/2)
+        R = Rscale*np.tanh(np.sqrt(Lx**2+Ly**2)*(beta-np.sqrt((X/Lx)**2+(Y/Ly)**2))/2)
     else:
-        R = r*np.ones((Nx, Ny))
+        R = Rscale*np.ones((Nx, Ny))
 
     # set initial condition, init_flag=3 means we are on the ellipse
     if init_flag == 1:
@@ -81,7 +81,9 @@ def solveSH(Lx,Ly,Nx,Ny,h,tmax,filename,r=.5,beta=.45,amplitude=.1,init_flag=1):
     nmax = int(np.round(tmax/h))
     tt = np.zeros(nmax+1)
     uu = np.zeros((Nx,Ny,nmax+1))
+    ee = np.zeros((Nx,Ny,nmax+1))
     uu[:, :, 0] = u0
+    ee[:,:,0] = edensity(xi,eta,u0,ind,R)
     tt[0] = 0
     ii = 0
     start = time.time()
@@ -105,9 +107,16 @@ def solveSH(Lx,Ly,Nx,Ny,h,tmax,filename,r=.5,beta=.45,amplitude=.1,init_flag=1):
         tt[ii + 1] = t
         ii = ii + 1
 
+        if energy:
+            ee[:,:,ii+1] = edensity(xi,eta,u0,ind,R)
+
+
     end = time.time()
     print("time to generate solutions: ", end - start)
-    mdict = {"tt": tt.reshape(1, len(tt)), "xx": xx.reshape(Nx, 1), "yy": yy.reshape(Ny, 1), "uu": uu}
+    if energy:
+        mdict = {"tt": tt.reshape(1, len(tt)), "xx": xx.reshape(Nx, 1), "yy": yy.reshape(Ny, 1), "uu": uu,"ee": ee}
+    else:
+        mdict = {"tt": tt.reshape(1, len(tt)), "xx": xx.reshape(Nx, 1), "yy": yy.reshape(Ny, 1), "uu": uu}
     sp.io.savemat("/Users/edwardmcdugald/Research/convection_patterns_wip/code/data/"+str(filename)+".mat", mdict)
 
 
@@ -127,6 +136,21 @@ def ellipse_init(X,Y,a,b,amp):
     xi,eta = np.meshgrid(kx,ky,indexing='ij')
     rho = sp.fft.ifft2(np.exp(-(xi**2+eta**2))*sp.fft.fft2(rho))
     return np.real(amp*np.sin(np.sqrt(rho)))
+
+def edensity(xi,eta,u0,ind,R):
+    eloc = (1-xi**2-eta**2)*sp.fft.fft2(u0)
+    eloc[ind] = 0
+    eloc = np.real(sp.fft.ifft2(eloc)**2)
+
+    u0sq = sp.fft.fft2(u0**2)
+    u0sq[ind] = 0
+    u0sq = np.real(sp.fft.ifft2(u0sq))
+
+    u04th = sp.fft.fft2(u0sq**2)
+    u04th[ind] = 0
+    u04th = np.real(sp.fft.ifft2(u04th))
+    return .5*(eloc-R*u0sq+.5*u04th)
+
 
 
 
