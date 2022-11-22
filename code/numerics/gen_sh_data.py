@@ -160,7 +160,7 @@ mdict={"tt":tt.reshape(1,len(tt)),"xx":xx.reshape(Nx,1),"yy":yy.reshape(Ny,1),"u
 #sp.io.savemat("/Users/edwardmcdugald/Research/convection_patterns_wip/code/data/SHpy4.mat",mdict)
 
 #Ran this with init_flag = 3, R=Tanh function, Nx=1024, Ny=256, Lx = 80pi, Ly=20pi, tmax = 5, h=.01, beta=.4
-sp.io.savemat("/Users/edwardmcdugald/Research/convection_patterns_wip/code/data/SHpy5.mat",mdict)
+#sp.io.savemat("/Users/edwardmcdugald/Research/convection_patterns_wip/code/data/SHpy5.mat",mdict)
 
 print("time to generate solutions: ", end-start)
 
