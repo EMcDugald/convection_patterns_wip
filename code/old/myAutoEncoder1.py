@@ -1,14 +1,7 @@
 import numpy as np
 import tensorflow as tf
 import pickle
-from scipy.special import binom
-
-def library_size(n):
-    l = 0
-    for k in range(2):
-        l += int(binom(n+k-1,k))
-    return l
-
+from myPDEFIND import SpectralDerivs
 from tensorflow.python.framework.ops import disable_eager_execution
 
 disable_eager_execution()
@@ -23,23 +16,18 @@ def full_network(params):
         network - Dictionary containing the tensorflow objects that make up the network.
     """
     input_dim = params['input_dim']
-    #ToDo: perhaps this can just be 1 by default
     latent_dim = params['latent_dim']
     activation = params['activation']
-    #ToDo: has user pass in a list of strings, like "1, z, z^2, z_x, z_y, z_xx, z_yy, z_xy, biharmz, etc"
-    #the length of this string should be library dim
-    library_dim = params['library_dim']
-
+    library_dim = len(params['lib_form'])
 
     network = {}
-
-    x = tf.compat.v1.placeholder(tf.float32, shape=[None, input_dim], name='x')
-    dx = tf.compat.v1.placeholder(tf.float32, shape=[None, input_dim], name='dx')
-    z, x_decode, encoder_weights, encoder_biases, decoder_weights, \
-    decoder_biases = nonlinear_autoencoder(x,input_dim,latent_dim,
-                                            params['widths'],activation=activation)
-    dz = z_derivative(x, dx, encoder_weights, encoder_biases, activation=activation)
-    Theta = sindy_library_tf(z, latent_dim)
+    U = tf.compat.v1.placeholder(tf.float32, shape=[None, input_dim], name='U')
+    dU = tf.compat.v1.placeholder(tf.float32, shape=[None, input_dim], name='dU')
+    z, U_decode, encoder_weights, encoder_biases, decoder_weights, \
+    decoder_biases = nonlinear_autoencoder(U,input_dim,latent_dim,params['widths'],activation=activation)
+    dz = z_derivative(U, dU, encoder_weights, encoder_biases, activation=activation)
+    # Theta = sindy_library_tf(z, latent_dim)
+    Theta = sindy_library_tf(z,library_dim)
 
     if params['coefficient_initialization'] == 'xavier':
         sindy_coefficients = tf.compat.v1.get_variable('sindy_coefficients', shape=[library_dim, latent_dim],
@@ -60,15 +48,15 @@ def full_network(params):
     else:
         sindy_predict = tf.matmul(Theta, sindy_coefficients)
 
-    dx_decode = z_derivative(z, sindy_predict, decoder_weights, decoder_biases, activation=activation)
+    dU_decode = z_derivative(z, sindy_predict, decoder_weights, decoder_biases, activation=activation)
 
 
-    network['x'] = x
-    network['dx'] = dx
+    network['U'] = U
+    network['dU'] = dU
     network['z'] = z
     network['dz'] = dz
-    network['x_decode'] = x_decode
-    network['dx_decode'] = dx_decode
+    network['U_decode'] = U_decode
+    network['dU_decode'] = dU_decode
     network['encoder_weights'] = encoder_weights
     network['encoder_biases'] = encoder_biases
     network['decoder_weights'] = decoder_weights
@@ -86,31 +74,31 @@ def define_loss(network, params):
         network - Dictionary object containing the elements of the network architecture.
         This will be the output of the full_network() function.
     """
-    x = network['x']
-    x_decode = network['x_decode']
+    U = network['U']
+    U_decode = network['U_decode']
     dz = network['dz']
     dz_predict = network['dz_predict']
-    dx = network['dx']
-    dx_decode = network['dx_decode']
+    dU = network['dU']
+    dU_decode = network['dU_decode']
     sindy_coefficients = params['coefficient_mask'] * network['sindy_coefficients']
     losses = {}
-    losses['decoder'] = tf.reduce_mean(input_tensor=(x - x_decode) ** 2)
+    losses['decoder'] = tf.reduce_mean(input_tensor=(U - U_decode) ** 2)
     losses['sindy_z'] = tf.reduce_mean(input_tensor=(dz - dz_predict) ** 2)
-    losses['sindy_x'] = tf.reduce_mean(input_tensor=(dx - dx_decode) ** 2)
+    losses['sindy_U'] = tf.reduce_mean(input_tensor=(dU - dU_decode) ** 2)
     losses['sindy_regularization'] = tf.reduce_mean(input_tensor=tf.abs(sindy_coefficients))
     loss = params['loss_weight_decoder'] * losses['decoder'] \
            + params['loss_weight_sindy_z'] * losses['sindy_z'] \
-           + params['loss_weight_sindy_x'] * losses['sindy_x'] \
+           + params['loss_weight_sindy_U'] * losses['sindy_U'] \
            + params['loss_weight_sindy_regularization'] * losses['sindy_regularization']
 
     loss_refinement = params['loss_weight_decoder'] * losses['decoder'] \
                       + params['loss_weight_sindy_z'] * losses['sindy_z'] \
-                      + params['loss_weight_sindy_x'] * losses['sindy_x']
+                      + params['loss_weight_sindy_U'] * losses['sindy_U']
 
     return loss, losses, loss_refinement
 
 
-def nonlinear_autoencoder(x, input_dim, latent_dim, widths, activation='elu'):
+def nonlinear_autoencoder(U, input_dim, latent_dim, widths, activation='elu'):
     """
     Construct a nonlinear autoencoder.
     Arguments:
@@ -130,14 +118,12 @@ def nonlinear_autoencoder(x, input_dim, latent_dim, widths, activation='elu'):
         activation_function = tf.sigmoid
     else:
         raise ValueError('invalid activation function')
-    # z,encoder_weights,encoder_biases = encoder(x, input_dim, latent_dim, widths, activation_function, 'encoder')
-    # x_decode,decoder_weights,decoder_biases = decoder(z, input_dim, latent_dim, widths[::-1], activation_function, 'decoder')
-    z, encoder_weights, encoder_biases = build_network_layers(x, input_dim, latent_dim, widths, activation_function,
+    z, encoder_weights, encoder_biases = build_network_layers(U, input_dim, latent_dim, widths, activation_function,
                                                               'encoder')
-    x_decode, decoder_weights, decoder_biases = build_network_layers(z, latent_dim, input_dim, widths[::-1],
+    U_decode, decoder_weights, decoder_biases = build_network_layers(z, latent_dim, input_dim, widths[::-1],
                                                                      activation_function, 'decoder')
 
-    return z, x_decode, encoder_weights, encoder_biases, decoder_weights, decoder_biases
+    return z, U_decode, encoder_weights, encoder_biases, decoder_weights, decoder_biases
 
 
 def build_network_layers(input, input_dim, output_dim, widths, activation, name):
@@ -179,19 +165,6 @@ def build_network_layers(input, input_dim, output_dim, widths, activation, name)
     return input, weights, biases
 
 def sindy_library_tf(z, latent_dim):
-    """
-    Build the SINDy library.
-    Arguments:
-        z - 2D tensorflow array of the snapshots on which to build the library. Shape is number of
-        time points by the number of state variables.
-        latent_dim - Integer, number of state variable in z.
-        poly_order - Integer, polynomial order to which to build the library. Max value is 5.
-        include_sine - Boolean, whether or not to include sine terms in the library. Default False.
-    Returns:
-        2D tensorflow array containing the constructed library. Shape is number of time points by
-        number of library functions. The number of library functions is determined by the number
-        of state variables of the input, the polynomial order, and whether or not sines are included.
-    """
     library = [tf.ones(tf.shape(input=z)[0])]
     for i in range(latent_dim):
         library.append(z[:, i])
@@ -199,7 +172,7 @@ def sindy_library_tf(z, latent_dim):
 
 
 
-def z_derivative(input, dx, weights, biases, activation='elu'):
+def z_derivative(input, dU, weights, biases, activation='elu'):
     """
     Compute the first order time derivatives by propagating through the network.
     Arguments:
@@ -214,7 +187,7 @@ def z_derivative(input, dx, weights, biases, activation='elu'):
     Returns:
         dz - Tensorflow array, first order time derivatives of the network output.
     """
-    dz = dx
+    dz = dU
     if activation == 'elu':
         for i in range(len(weights) - 1):
             input = tf.matmul(input, weights[i]) + biases[i]
@@ -251,8 +224,8 @@ def train_network(training_data, val_data, params):
 
     validation_dict = create_feed_dictionary(val_data, params, idxs=None)
 
-    x_norm = np.mean(val_data['x'] ** 2)
-    sindy_predict_norm_x = np.mean(val_data['dx'] ** 2)
+    x_norm = np.mean(val_data['U'] ** 2)
+    sindy_predict_norm_x = np.mean(val_data['Ut'] ** 2)
 
     validation_losses = []
     sindy_model_terms = [np.sum(params['coefficient_mask'])]
@@ -360,10 +333,10 @@ def create_feed_dictionary(data, params, idxs=None):
         feed_dict - Dictionary object containing the relevant data to pass to tensorflow.
     """
     if idxs is None:
-        idxs = np.arange(data['x'].shape[0])
+        idxs = np.arange(data['U'].shape[0])
     feed_dict = {}
-    feed_dict['x:0'] = data['x'][idxs]
-    feed_dict['dx:0'] = data['dx'][idxs]
+    feed_dict['U:0'] = data['U'][idxs]
+    feed_dict['Ut:0'] = data['Ut'][idxs]
     if params['sequential_thresholding']:
         feed_dict['coefficient_mask:0'] = params['coefficient_mask']
     feed_dict['learning_rate:0'] = params['learning_rate']

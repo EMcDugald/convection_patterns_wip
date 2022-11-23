@@ -1,0 +1,77 @@
+print(np.shape(training_data['U'].reshape((N,-1)).T))
+
+input_data = Input(shape=(len(xx)*len(yy),1))
+x = Conv1D(32, 3, activation='sigmoid', padding='same')(input_data)
+x = Dense(25, activation='sigmoid')(x)
+x = Dense(25, activation='sigmoid')(x)
+x = Dense(25, activation='sigmoid')(x)
+encoded = Dense(1,activation='softmax')(x)
+encoder = Model(input_data, encoded)
+encoder.summary()
+
+decoder_input= Input(shape=(len(xx)*len(yy),1))
+x = Conv1D(32, 3, activation='sigmoid', padding='same')(decoder_input)
+x = Dense(25, activation='sigmoid')(x)
+x = Dense(25, activation='sigmoid')(x)
+x = Dense(25, activation='sigmoid')(x)
+decoded = Dense(1,activation='softmax')(x)
+decoder = Model(decoder_input, decoded)
+decoder.summary()
+
+auto_input = Input(shape=(len(xx)*len(yy),1))
+encoded = encoder(auto_input)
+decoded = decoder(encoded)
+auto_encoder = Model(auto_input, decoded)
+auto_encoder.summary()
+
+auto_encoder.compile(loss='mean_squared_error', optimizer = tf.keras.optimizers.Adam(learning_rate=0.0001))
+
+auto_encoder.fit(training_data['U'].reshape((N,-1)).T, training_data['U'].reshape((N,-1)).T,
+                epochs=20,
+                batch_size=20
+                #shuffle=True
+                #validation_data=(test_data['U'].reshape((N,-1)).T, test_data['U'].reshape((N,-1)).T)
+               )
+
+
+
+#########################
+
+from keras.layers import Input, Dense, Conv2D, Conv1D, MaxPooling2D, UpSampling2D
+from keras.models import Model
+import tensorflow as tf
+
+print(np.shape(training_data['U']))
+
+input_data = Input(shape=(len(xx), len(yy),1))
+x = Conv2D(32, (3, 3), activation='sigmoid', padding='same')(input_data)
+x = Dense(25, activation='sigmoid')(x)
+x = Dense(25, activation='sigmoid')(x)
+x = Dense(25, activation='sigmoid')(x)
+encoded = Dense(1,activation='relu')(x)
+encoder = Model(input_data, encoded)
+encoder.summary()
+
+decoder_input= Input(shape=(len(xx), len(yy),1))
+x = Conv2D(32, (3, 3), activation='sigmoid', padding='same')(decoder_input)
+x = Dense(25, activation='sigmoid')(x)
+x = Dense(25, activation='sigmoid')(x)
+x = Dense(25, activation='sigmoid')(x)
+decoded = Dense(1,activation='relu')(x)
+decoder = Model(decoder_input, decoded)
+decoder.summary()
+
+auto_input = Input(shape=(len(xx),len(yy),1))
+encoded = encoder(auto_input)
+decoded = decoder(encoded)
+auto_encoder = Model(auto_input, decoded)
+auto_encoder.summary()
+
+auto_encoder.compile(loss='mean_squared_error', optimizer='adam')
+
+auto_encoder.fit(training_data['U'].T, training_data['U'].T,
+                epochs=20,
+                batch_size=20
+                #shuffle=True,
+                #validation_data=(test_data['U'].T, test_data['U'].T)
+               )
