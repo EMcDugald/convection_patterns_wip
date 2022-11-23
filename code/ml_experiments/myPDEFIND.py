@@ -1,17 +1,5 @@
 import numpy as np
 from scipy.fft import fft2, ifft2, fftfreq
-from scipy.special import binom
-from scipy.integrate import odeint
-
-def library_size(n, poly_order, use_sine=False, include_constant=True):
-    l = 0
-    for k in range(poly_order+1):
-        l += int(binom(n+k-1,k))
-    if use_sine:
-        l += n
-    if not include_constant:
-        l -= 1
-    return l
 
 def PolyDiffPoint(u, x, deg=3, diff=1):
     """
