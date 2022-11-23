@@ -1,22 +1,6 @@
 import numpy as np
 from scipy.fft import fft2, ifft2, fftfreq
 
-def PolyDiffPoint(u, x, deg=3, diff=1):
-    """
-    Fits a chebyshev polynomial to the data, and
-    takes the derivative. Using this for u_t estimates
-    u = values of some function
-    x = x-coordinates where values are known
-    deg = degree of polynomial to use
-    diff = maximum order derivative we want
-    """
-    n = len(x)
-    index = (n - 1) // 2
-    # Fit to a polynomial
-    poly = np.polynomial.chebyshev.Chebyshev.fit(x, u, deg)
-    # Take derivative
-    return poly.deriv(m=1)(x[index])
-
 def BackwardDiff(u_curr, u_past, dt):
     """
     :param u_curr: current time func values

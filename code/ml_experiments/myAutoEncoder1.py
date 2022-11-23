@@ -3,14 +3,10 @@ import tensorflow as tf
 import pickle
 from scipy.special import binom
 
-def library_size(n, poly_order, use_sine=False, include_constant=True):
+def library_size(n):
     l = 0
-    for k in range(poly_order+1):
+    for k in range(2):
         l += int(binom(n+k-1,k))
-    if use_sine:
-        l += n
-    if not include_constant:
-        l -= 1
     return l
 
 from tensorflow.python.framework.ops import disable_eager_execution
@@ -27,40 +23,23 @@ def full_network(params):
         network - Dictionary containing the tensorflow objects that make up the network.
     """
     input_dim = params['input_dim']
+    #ToDo: perhaps this can just be 1 by default
     latent_dim = params['latent_dim']
     activation = params['activation']
-    poly_order = params['poly_order']
-    if 'include_sine' in params.keys():
-        include_sine = params['include_sine']
-    else:
-        include_sine = False
+    #ToDo: has user pass in a list of strings, like "1, z, z^2, z_x, z_y, z_xx, z_yy, z_xy, biharmz, etc"
+    #the length of this string should be library dim
     library_dim = params['library_dim']
-    model_order = params['model_order']
+
 
     network = {}
 
     x = tf.compat.v1.placeholder(tf.float32, shape=[None, input_dim], name='x')
     dx = tf.compat.v1.placeholder(tf.float32, shape=[None, input_dim], name='dx')
-    if model_order == 2:
-        ddx = tf.compat.v1.placeholder(tf.float32, shape=[None, input_dim], name='ddx')
-
-    if activation == 'linear':
-        z, x_decode, encoder_weights, encoder_biases, decoder_weights, decoder_biases = linear_autoencoder(x, input_dim,
-                                                                                                           latent_dim)
-    else:
-        z, x_decode, encoder_weights, encoder_biases, decoder_weights, decoder_biases = nonlinear_autoencoder(x,
-                                                                                                              input_dim,
-                                                                                                              latent_dim,
-                                                                                                              params[
-                                                                                                                  'widths'],
-                                                                                                              activation=activation)
-
-    if model_order == 1:
-        dz = z_derivative(x, dx, encoder_weights, encoder_biases, activation=activation)
-        Theta = sindy_library_tf(z, latent_dim, poly_order, include_sine)
-    else:
-        dz, ddz = z_derivative_order2(x, dx, ddx, encoder_weights, encoder_biases, activation=activation)
-        Theta = sindy_library_tf_order2(z, dz, latent_dim, poly_order, include_sine)
+    z, x_decode, encoder_weights, encoder_biases, decoder_weights, \
+    decoder_biases = nonlinear_autoencoder(x,input_dim,latent_dim,
+                                            params['widths'],activation=activation)
+    dz = z_derivative(x, dx, encoder_weights, encoder_biases, activation=activation)
+    Theta = sindy_library_tf(z, latent_dim)
 
     if params['coefficient_initialization'] == 'xavier':
         sindy_coefficients = tf.compat.v1.get_variable('sindy_coefficients', shape=[library_dim, latent_dim],
@@ -81,11 +60,8 @@ def full_network(params):
     else:
         sindy_predict = tf.matmul(Theta, sindy_coefficients)
 
-    if model_order == 1:
-        dx_decode = z_derivative(z, sindy_predict, decoder_weights, decoder_biases, activation=activation)
-    else:
-        dx_decode, ddx_decode = z_derivative_order2(z, dz, sindy_predict, decoder_weights, decoder_biases,
-                                                    activation=activation)
+    dx_decode = z_derivative(z, sindy_predict, decoder_weights, decoder_biases, activation=activation)
+
 
     network['x'] = x
     network['dx'] = dx
@@ -99,15 +75,7 @@ def full_network(params):
     network['decoder_biases'] = decoder_biases
     network['Theta'] = Theta
     network['sindy_coefficients'] = sindy_coefficients
-
-    if model_order == 1:
-        network['dz_predict'] = sindy_predict
-    else:
-        network['ddz'] = ddz
-        network['ddz_predict'] = sindy_predict
-        network['ddx'] = ddx
-        network['ddx_decode'] = ddx_decode
-
+    network['dz_predict'] = sindy_predict
     return network
 
 
@@ -127,9 +95,8 @@ def define_loss(network, params):
     sindy_coefficients = params['coefficient_mask'] * network['sindy_coefficients']
     losses = {}
     losses['decoder'] = tf.reduce_mean(input_tensor=(x - x_decode) ** 2)
-    if params['model_order'] == 1:
-        losses['sindy_z'] = tf.reduce_mean(input_tensor=(dz - dz_predict) ** 2)
-        losses['sindy_x'] = tf.reduce_mean(input_tensor=(dx - dx_decode) ** 2)
+    losses['sindy_z'] = tf.reduce_mean(input_tensor=(dz - dz_predict) ** 2)
+    losses['sindy_x'] = tf.reduce_mean(input_tensor=(dx - dx_decode) ** 2)
     losses['sindy_regularization'] = tf.reduce_mean(input_tensor=tf.abs(sindy_coefficients))
     loss = params['loss_weight_decoder'] * losses['decoder'] \
            + params['loss_weight_sindy_z'] * losses['sindy_z'] \
@@ -285,10 +252,7 @@ def train_network(training_data, val_data, params):
     validation_dict = create_feed_dictionary(val_data, params, idxs=None)
 
     x_norm = np.mean(val_data['x'] ** 2)
-    if params['model_order'] == 1:
-        sindy_predict_norm_x = np.mean(val_data['dx'] ** 2)
-    else:
-        sindy_predict_norm_x = np.mean(val_data['ddx'] ** 2)
+    sindy_predict_norm_x = np.mean(val_data['dx'] ** 2)
 
     validation_losses = []
     sindy_model_terms = [np.sum(params['coefficient_mask'])]
@@ -330,10 +294,7 @@ def train_network(training_data, val_data, params):
         final_losses = sess.run((losses['decoder'], losses['sindy_x'], losses['sindy_z'],
                                  losses['sindy_regularization']),
                                 feed_dict=validation_dict)
-        if params['model_order'] == 1:
-            sindy_predict_norm_z = np.mean(sess.run(autoencoder_network['dz'], feed_dict=validation_dict) ** 2)
-        else:
-            sindy_predict_norm_z = np.mean(sess.run(autoencoder_network['ddz'], feed_dict=validation_dict) ** 2)
+        sindy_predict_norm_z = np.mean(sess.run(autoencoder_network['dz'], feed_dict=validation_dict) ** 2)
         sindy_coefficients = sess.run(autoencoder_network['sindy_coefficients'], feed_dict={})
 
         results_dict = {}
@@ -403,8 +364,6 @@ def create_feed_dictionary(data, params, idxs=None):
     feed_dict = {}
     feed_dict['x:0'] = data['x'][idxs]
     feed_dict['dx:0'] = data['dx'][idxs]
-    if params['model_order'] == 2:
-        feed_dict['ddx:0'] = data['ddx'][idxs]
     if params['sequential_thresholding']:
         feed_dict['coefficient_mask:0'] = params['coefficient_mask']
     feed_dict['learning_rate:0'] = params['learning_rate']
