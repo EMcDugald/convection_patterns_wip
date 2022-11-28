@@ -18,7 +18,7 @@ def t6hat(rmax,rmin,x):
    xx4 = sin6hat(xx3)
    return xx4
 
-def gen_sigma_2(a,X1,X2,sc1,sc2):
+def gen_sigma(a,X1,X2,sc1,sc2):
     q1center = np.array([0, 0])
     z1 = t6hat(a/sc1, a/sc2 ,X1-q1center[0])*t6hat(a/sc1,a/sc2,X2-q1center[1])
     return z1
