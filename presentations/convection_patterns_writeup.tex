@@ -340,7 +340,98 @@ total energy at time 200:  -1518.3769630101526
 \end{figure}
 \section{Machine Learning Experiments}
 \subsection{SINDy-like methods for PDEs}
-\par Note that the problem at hand involves a microscopic model exhibiting behavior that is not yet deduced from the macroscopic model. This raises the possibility that the macroscopic model does not capture all aspects of the microscopic equations. Thus, one may be tempted to find an additional term to the macroscopic model. 
+\par Note that the problem at hand involves a microscopic model exhibiting behavior that is not yet deduced from the macroscopic model. This raises the possibility that the macroscopic model does not capture all aspects of the microscopic equations. Thus, one may be tempted to find an additional term to the macroscopic model. This idea motivates the study of existing methods for discovering governing equations from data.
+\par Perhaps the most well known method is the Sparse Identification of Nonlinear Dynamics, or SINDy, introduced by Kutz et al for discovery of equations governing dynamical systems. Since the original publication, SINDy-like methods have been proposed to discover PDEs. As a preliminary first step, we combined ideas from Kutz and Schaefer to discover the Swift Hohenberg PDE from data consisting of solutions on the square. 
+\par Using a square grid of dimension $256 \times 256$ on the interval $[-25\pi,25\pi]^2$, we integrate Swift-Hohenberg from $t=0$ to $t=100$ using time step $h = .5$. Thus, we obtain a dataset of dimension $256 \times 256 \times 201$. We used backward finite differences to compute $200$ time derivatives $u_t(x_i,y_j,t_k)$. We then form various features out of the data $u(x_i,y_j,t_k)$. These features can be any term we suspect might be in the PDE, and primarily consists of polunomial functions, trigonometric functions, and spatial derivatives of $u$. We then form the matrix equation $u_t = \Theta(u)\xi$, where $\Theta$ is a matrix whose columns are the features constructed from $u$. The task then is to solve $u_t = \Theta(u)\xi$ where $\xi$ is a sparse vector of coefficients. Figure 5.1 shows an example of the matrix equation one might form where $u$ depends on only one spatial variable.
+\begin{figure}
+\centering
+\includegraphics[scale=0.5]{pde_sindy_lib.png}
+\caption{SINDy equation for PDEs with one spatial variable}
+\end{figure}
+\par Once the time derivatives are obtained and feature matrix is constructed, the task is to approximate a solution of
+\begin{equation}
+    \xi = \text{argmin}_{\hat{\xi}}\| \Theta(u)\hat{\xi}-u_t\|_2^{2}+\lambda \|\hat{\xi}\|_{0}.
+\end{equation}
+In practice, what we actually solve is
+\begin{equation}
+    \xi = \text{argmin}_{\hat{\xi}}\| \Theta(u)\hat{\xi}-u_t\|_2^2+\lambda \|\hat{\xi}\|_{1}.
+\end{equation}
+Following the approach of Kutz, we use Sequential Threshold Ridge Regression with a test/train split, outlined in algorithm 1 and algorithm 2.
+\begin{figure}
+\centering
+\includegraphics[scale=0.5]{STRidge.png}
+\caption{Algorithm 1: STRidge}
+\end{figure}
+\begin{figure}
+\centering
+\includegraphics[scale=0.5]{TrainSTRidge.png}
+\caption{Algorithm 2: TrainSTRidge}
+\end{figure}
+\par Following the approach of Schaefer, we use coarsened grids to reduce the data being passed to the optimization procedure, and use spectral methods to form the spatial derivatives being passed to our library. Note that all polynomials, spatial derivatives and time derivatives are reshaped into column vectors and stacked vertically. For this preliminary proof of concept, our library is constructed with the terms $1,u,u^2,u^3,u^4,u_x, u_y, u_x^2, u_y^2, u_x u_y, u_{xy}, u_{xx}, u_{yy},\nabla^2u$, and $\nabla^4 u$. Figure 5.4 displays the code used for the coarsening procedure and the formation of $\Theta(u)$.
+\begin{figure}
+\centering
+\includegraphics[scale=0.5]{PDEFindCode1.png}
+\caption{Code for coarsening and SINDy library}
+\end{figure}
+\par Having formed $u_t$ and $\Theta(u)$, we call the TrainSTRidge algorithm, and recover the Swift-Hohenberg PDE, as seen in figure 5.5.
+\begin{figure}
+\centering
+\includegraphics[scale=0.5]{PDEFindCode2.png}
+\caption{Result of optimization procedure}
+\end{figure}
+\subsection{Combining SINDy with an Autoencoder}
+\par Having "discovered" the form of the microscopic model from numerical simulations, a natural next step is to discover the macroscopic model. The use of autoencoder neural networks have been demonstrated to recover dynamics in terms of an alternative coordinate system. Consider for example, a video of a swinging pendulum. Kutz et al were able to combine an autoencoder with the SINDy framework to obtain the equation $\ddot{\theta} = \sin(\theta)$. However, we are not aware of examples where the recovered model is a PDE. The one example explored on PDE data was with a coupled reaction-diffusion system, from which the SINDy + Autoencoder method recovered a dynamical system. Thus, we are unaware of any examples of using an autoencoder with SINDy to recover a PDE.
+\par The method trains a neural network to generate its own input, with a latent space (typically of reduced dimension) in the middle. Thus, we can break the autoencoder into two components, the encoder and the decoder. If $x$ is our input data, $z$ the latent space representation of $x$, and $\hat{x}$ the output, the autoencoder can be represented as
+\begin{equation}
+    \hat{x} = \psi(z) = \psi(\varphi(x)).
+\end{equation}
+In this case $\varphi$ is the encoder and $\psi$ is the decoder. The method consists of minimizing the autoencoder error, coupled with minimizing the SINDy error applied to the latent space representation. The loss function for a single example is then
+\begin{equation}
+    L(x) = \|x - \psi(z)\|_2^2 + \lambda_1\|(\nabla_x z)\dot{x}-\Theta(z)\xi\|_2^2 + \lambda_2\|\xi\|_1.
+\end{equation}
+\par Despite a lack of working examples, we set out to explore this concept, in the hopes of recovering the RCN from Swift-Hohenberg data. While one could hypothetically generate phase surfaces, and apply the standard SINDy procedure to those surfaces, it is a more interesting challenge to discover the model without asserting knowledge of the expected coordinate transformation. The first step is to obtain a working autoencoder, which we achieve using both a standard feed forward network and a convolutional network. We use data of dimension $1001 \times 128 \times 128$, and select our latent space to be of dimension $32 \time 32$. Figure 6.1 displays code for the network of Dense layers, while figure 6.2 displays code for the convolutional neural network. Figures 6.3 and 6.4 display the corresponding model summaries.
+\begin{figure}
+\centering
+\includegraphics[scale=0.5]{ae1.png}
+\caption{Dense Autoencoder Code}
+\end{figure}
+\begin{figure}
+\centering
+\includegraphics[scale=0.5]{ae2.png}
+\caption{Dense Autoencoder Summary}
+\end{figure}
+\begin{figure}
+\centering
+\includegraphics[scale=0.5]{ae3.png}
+\caption{Convolutional Autoencoder Code}
+\end{figure}
+\begin{figure}
+\centering
+\includegraphics[scale=0.5]{ae4.png}
+\caption{Convolutional Autoencoder Summary}
+\end{figure}
+We run the autoencoders on 10 random samples from data that was not touched during training, and visualize the latent space, along with the input and its autoencoder approximation. Those comparisons are seen in figure 6.5 for the dense encoder, and 6.6 for the convolutional encoder.
+\begin{figure}
+\centering
+\includegraphics[scale=0.35]{ae5.png}
+\caption{Dense Autoencoder Latent Space}
+\end{figure}
+\begin{figure}
+\centering
+\includegraphics[scale=0.35]{ae6.png}
+\caption{Convolutional Autoencoder Latent Space}
+\end{figure}
+\par There is still much work remaining to integrate the autoencoder with the SINDy optimization procedure. The first concern is how to best integrate the SINDy procedure into the training. We will take as our first approach a training procedure that uses batches of 10. After the reconstruction loss is computed, we will perform the SINDy optimization on the latent space for the 10 samples, and combine that error with the autoencoder error. A key uncertainty here is how to best estimate time derivatives of the latent space variable, as well as how to compute its spatial derivatives.
+\section{Conclusion}
+\par We conclude this report by listing the key tasks moving forward.
+\begin{enumerate}
+    \item We need to perform a careful analysis of the derivation of the RCN for real fields. Much of the reasoning used for real fields is more delicate than for complex fields.
+    \item We need to study the self-dual stationary solutions, and the role the Jacobian of the map from $(x,y)$ to $\bm{k}=(\theta_x,\theta_y)$ plays in the analysis.
+    \item The autoencoder framework is completely uncoupled from the SINDy optimization procedure, and therefore we must merge them together.
+    \item Discovering a model through SINDy like methods may not be the way to resolve this problem. However, I believe there are interesting machine learning experiments that can be performed to gain insight. For instance, autoencoders may be used to perform anomaly detection, which may be relevant if training an autoencoder on data prior to the formation of the stair-step pattern. We could also compare the performance of a pair of autoencoders on the elliptical solutions, where one autoencoder uses one latent variable, and the other uses two latent variables. Such a comparison may be used to suggest the emergence (or lack thereof) of another order parameter. Finally, reconstructing high resolution solutions of the microscopic model from coarse samples of the macroscopic model can be useful in determining the relevant order parameters.
+\end{enumerate}
+
+
 
 
 
