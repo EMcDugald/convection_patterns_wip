@@ -30,8 +30,8 @@
 
 \maketitle
 \section{Introduction}
-\par The aim of this report is to describe an open problem in pattern forming systems, pertaining specifically to patterns deriving from microscopic gradient flows that are translationally and rotationally invariant, and that admit straight parallel roll solutions on infinite domains. On finite domains however, such rolls may emerge in different locations with different orientations, and they meet in the interior of the domain generating point and line defects. Such pattern forming systems, while arising from various microscopic gradient systems, obey a universal PDE describing the evolution of the phase variable, $\theta$. 
-\par A canonical example of such patterns in nature is seen through Rayleigh-B\'{e}nard convection. Rayleigh-B\'{e}nard convection may be observed by trapping a thin layer of fluid between two plates, and applying heat to the bottom plate. In the microscopic model which we will consider, the stress parameter $R$ is the difference in heat between the top and bottom plate. Initially heat will transfer through the fluid by conduction, however past a critical value, heat will transfer through convection, generating a velocity field that manifests as temperature rolls in the fluid. In the figures we will present in this report, we may consider the surfaces as being the average temperature along the $z$ direction. 
+\par The aim of this report is to describe an open problem in pattern forming systems, pertaining to patterns deriving from microscopic gradient flows that are translationally and rotationally invariant. Such systems admit straight parallel roll solutions on infinite domains. On finite domains, such rolls may emerge in different locations with different orientations, which meet in the interior of the domain generating point and line defects. Such pattern forming systems, while arising from various microscopic gradient systems, obey a universal PDE describing the evolution of the phase variable, $\theta$. 
+\par A canonical example of such patterns in nature is Rayleigh-B\'{e}nard convection. Rayleigh-B\'{e}nard convection may be observed by trapping a thin layer of fluid between two plates, and applying heat to the bottom plate. In the microscopic model which we will consider, the stress parameter $R$ is the difference in heat between the top and bottom plate. Initially heat will transfer through the fluid by conduction; past a critical value, heat will transfer through convection, generating a velocity field that manifests as temperature rolls in the fluid. In the figures we will present in this report, we may consider the surfaces as being the average temperature along the $z$ direction. 
 \begin{figure}
 \centering
 \includegraphics[scale=0.5]{convection_roll_examples.png}
@@ -51,18 +51,18 @@
     T &= \epsilon^2 t\\
     \Theta(\bm{X},T) &= \epsilon \theta(\bm{x},t)\\
     k &= \|\bm{k}\|\\
-    \epsilon &= \frac{l}{L} \quad \text{The inverse aspect ratio}.
+    \epsilon &= \frac{l}{L} \quad \text{(The inverse aspect ratio)}.
 \end{align*}
 Letting $w$ be the variable of the microscopic equations, and $E$ the associated energy functional, we apply the following modulational Ansatz:
 \begin{align}
     w &= \sum A_n(k^2)\cos(n\theta) \quad \text{(for real fields)}\\
     w &= A(k^2,\bm{X},T)e^{i\theta(\bm{x},t)} \quad \text{(for complex fields)}.
 \end{align}
-We then average the energy over the peridicity of the pattern
+We then average the energy over the periodicity of the pattern
 \begin{equation}
     \overline{E} = \frac{1}{2\pi} \int E d\theta
 \end{equation}
-and analyze the dependence of the energy on $A$ and $\Theta$ in orders of $\epsilon^n$. We find that the only orders of $\epsilon$ that contribute are $\mathcal{O}(\epsilon^0)$ and $\mathcal{O}(\epsilon^2)$, and that the energy can be interpreted as a sum of stretching and bending energies. We also find that stationary solutions can be deduced by balancing the stress and strain energies. We pose an open challenge, where a certain pattern appearing in simulations of microscopic gradient flows, and in experiments, is not yet deduced by the Cross-Newell equation. We also discuss some potential uses of machine learning to approach this problem. 
+and analyze the dependence of the energy on $A$ and $\Theta$ in orders of $\epsilon$. We find that the only orders of $\epsilon$ that contribute are $\mathcal{O}(\epsilon^0)$ and $\mathcal{O}(\epsilon^2)$, and that the energy can be interpreted as a sum of stretching and bending energies. We also find that stationary solutions can be deduced by balancing the stress and bend energies. We pose an open challenge, where a certain pattern appearing in simulations of microscopic gradient flows (and in experiments), is not yet deduced by the Cross-Newell equation. We also discuss potential uses of machine learning to approach this problem. 
 \section{The Regularized Cross-Newell Phase Diffusion Equation for Complex Fields}
 \subsection{Deriving the Unegularized Equation}
 \par We consider pattern forming systems that arise as PDEs that are equivalently gradient flows. These are a very general object, and we take as our preferred example to be the Swift Hohenberg equation. In its complexified form, the swift hohenberg equation has energy density
@@ -89,7 +89,7 @@ Thus, one obtains
 \end{align} 
 The complexified Swift-Hohenberg equations can be written as
 \begin{equation}
-    w_t = - \frac{\delta E}{\delta w^*}, \quad w^*_2 = -\frac{\delta E}{\delta w}.
+    w_t = - \frac{\delta E}{\delta w^*}, \quad w^*_t = -\frac{\delta E}{\delta w}.
 \end{equation}
 Using the Ansatz for complex fields (1.2), one can write
 \begin{equation}
@@ -103,7 +103,7 @@ Using the fact that $\nabla_{\bm{x}} = \epsilon\nabla_{\bm{X}}$, and writing $w=
  \nabla_{\bm{x}}w^* &= e^{-i\theta}(-i\bm{k}+\epsilon\nabla_{\bm{X}})A\\
     \nabla^2_{\bm{x}}w^* &= e^{-i\theta}(-k^2-i\epsilon(2\bm{x}\cdot \nabla_{\bm{X}}+\nabla_{\bm{X}}\cdot\bm{k})+\epsilon^2\nabla^2_{\bm{X}})A.
 \end{align}
-Inserting (1.2) into (2.1) with (2.6)-(2.9), and \emph{ignoring} terms of order $\mathcal{O}(\epsilon^3)$, one obtains
+Inserting (1.2) into (2.1) with (2.6)-(2.9), and \emph{ignoring} terms of order $> \mathcal{O}(\epsilon^2)$, one obtains
 \begin{align}
     E &= \begin{aligned}[t]
          &\int \left( (k^2-1)^2A^2 - RA^2 + \frac{1}{4}A^4 + K\right)d\bm{x}\\
@@ -120,7 +120,7 @@ By construction, $A_t = \epsilon^2 A_T$, and therefore $A_t$ is at most $\mathca
 \end{equation}
 This gives
 \begin{equation}
-    A^2 = R - (K^2-1)^2.
+    A^2 = R - (k^2-1)^2.
 \end{equation}
 This is known as the eikonal solution, which demands that the amplitude be slaved algebraically to the modulus of the phase gradient. This property holds for stress parameter values far from onset. 
 \par Having found a dominant relation for $A$, we seek an equation for $\Theta$. Using the eikonal solution, we can write the leading order energy as 
@@ -144,7 +144,7 @@ Thus, we obtain
 \begin{equation*}
     A^2 \theta_t = -A^2(k^2)\frac{dA^2(k^2)}{dk^2}2\nabla\cdot\bm{k}
 \end{equation*}
-Noting that $\theta_t = \epsilon \Theta_t$, $\nabla_{\bm{x}}=\epsilon\nabla_{\bm{X}}$, and setting
+Noting that $\theta_t = \epsilon \Theta_T$, $\nabla_{\bm{x}}=\epsilon\nabla_{\bm{X}}$, and setting
 \begin{equation}
     B(k^2) = A^2(k^2)\frac{dA^2(k^2)}{dk^2},
 \end{equation}
@@ -191,7 +191,7 @@ We see that we require
     \frac{d}{dk}(kB(k^2)) &<0\\
     B(k^2) &< 0.
 \end{align}
-It turns out that $B, (kB)'$ are the eigenvalues of the second order quasi-linear operator, and for all $k$ the above must hold. Let us consider the plot of $k$ vs $kB$. For the case of Swift-Hohenberg with $R=.5$, we have $B = -4(k^2-1)(.5-(k^2-1)^2)$. We see that there is a limited range of wave numbers where these values are satisfied. This range of wave numbers is knowen as the Busse-Balloon, and is the range $k_B<k<k_E$ as labeled in figure 2.2. It turns out for natural patterns, almost everywhere $k=k_B$, however along line defects we will have $k<k_B$.  
+It turns out that $B, (kB)'$ are the eigenvalues of the second order quasi-linear operator, and for all $k$ the above must hold. Let us consider the plot of $k$ vs $kB$. For the case of Swift-Hohenberg with $R=.5$, we have $B = -4(k^2-1)(.5-(k^2-1)^2)$. We see that there is a limited range of wave numbers where these values are satisfied. This range of wave numbers is known as the Busse-Balloon, and is the range $k_B<k<k_E$ as labeled in figure 2.2. It turns out for natural patterns, almost everywhere $k=k_B$, however along line defects we will have $k<k_B$.  
 \begin{figure}
 \centering
 \includegraphics[scale=0.5]{mybb.png}
@@ -276,7 +276,7 @@ where
 \end{equation}
 where $E_0$ here is used to denote the integrand of $\overline{E_0}$. Note that in the complex case, we had $B(k^2)=\frac{dE_0}{dk^2}$.
 \par The fact that the $\mathcal{O}(\epsilon)$ terms vanish in the averaged energy is not as clear in the case of the real field, but it still holds. The argument as to why is omitted for the time being. 
-\par Considering the $\mathcal{O}(\epsilon^2)$ terms, we argue in a similar fashion as we did for the case of complex fields. All terms involving $(\bm{k}\cdot \nabla_{\bm{X}})$ acting on the amplitudes yield terms proportional to $\frac{dA_n(k^2)}{dk^2}(\bm{k}\cdot \nabla_{\bm{X}}k^2)$ which can be written as $\bm{k}\cdot \nabla_{\bm{X}}(k^2-k_B^2)$. Since $k^2-k_B^2$ is small almost everywhere, there terms are negligible compared to the terms proportional to $\nabla \cdot \bm{k}$. Via integration by parts, one can obtain
+\par Considering the $\mathcal{O}(\epsilon^2)$ terms, we argue in a similar fashion as we did for the case of complex fields. All terms involving $(\bm{k}\cdot \nabla_{\bm{X}})$ acting on the amplitudes yield terms proportional to $\frac{dA_n(k^2)}{dk^2}(\bm{k}\cdot \nabla_{\bm{X}}k^2)$ which can be written as $\bm{k}\cdot \nabla_{\bm{X}}(k^2-k_B^2)$. Since $k^2-k_B^2$ is small almost everywhere, these terms are negligible compared to the terms proportional to $\nabla \cdot \bm{k}$. Via integration by parts, one can obtain
 \begin{equation}
     \epsilon^2 \int \langle w_{\theta}^2 \rangle (\nabla \cdot \bm{k})^2 d\bm{x} \approx \epsilon^2 \langle w_{\theta}^2 \rangle_{k_B}\int (\nabla \cdot \bm{k})^2 d\bm{x}. 
 \end{equation}
@@ -292,7 +292,7 @@ As we did for the complex field case, we can write the phase diffusion equation 
     \alpha &= -\frac{1}{4k_B}|B'(k_B)|.
 \end{align}
 In this form, the first term measures the "bending" energy, whereas the second term measures the "stretching" energy.
-\par As a quick demonstration of the fact that the wavenumber is almost constant throughout the pattern, and that the solution evolves so as to minimize an energy, figure 3.1 shows a solution of Swift-Hohenberg on the square alongside its energy density, and keep track of the total energy. We see that the energy tends to condense around bends within the pattern. We use random initial conditions for this solution.\newline
+\par As a quick demonstration of the fact that the wavenumber is almost constant throughout the pattern, and that the solution evolves so as to minimize an energy, figure 3.1 shows a solution of Swift-Hohenberg on the square alongside its energy density. We also keep track of the total energy at various time steps. We see that the energy tends to condense around bends within the pattern. We use random initial conditions for this solution.\newline
 \textbf{Total energy corresponding to figure 3.1}
 \begin{verbatim}
 total energy at time 15:  -33.888597248321645
@@ -342,7 +342,7 @@ total energy at time 200:  -1518.3769630101526
 \subsection{SINDy-like methods for PDEs}
 \par Note that the problem at hand involves a microscopic model exhibiting behavior that is not yet deduced from the macroscopic model. This raises the possibility that the macroscopic model does not capture all aspects of the microscopic equations. Thus, one may be tempted to find an additional term to the macroscopic model. This idea motivates the study of existing methods for discovering governing equations from data.
 \par Perhaps the most well known method is the Sparse Identification of Nonlinear Dynamics, or SINDy, introduced by Kutz et al for discovery of equations governing dynamical systems. Since the original publication, SINDy-like methods have been proposed to discover PDEs. As a preliminary first step, we combined ideas from Kutz and Schaefer to discover the Swift Hohenberg PDE from data consisting of solutions on the square. 
-\par Using a square grid of dimension $256 \times 256$ on the interval $[-25\pi,25\pi]^2$, we integrate Swift-Hohenberg from $t=0$ to $t=100$ using time step $h = .5$. Thus, we obtain a dataset of dimension $256 \times 256 \times 201$. We used backward finite differences to compute $200$ time derivatives $u_t(x_i,y_j,t_k)$. We then form various features out of the data $u(x_i,y_j,t_k)$. These features can be any term we suspect might be in the PDE, and primarily consists of polunomial functions, trigonometric functions, and spatial derivatives of $u$. We then form the matrix equation $u_t = \Theta(u)\xi$, where $\Theta$ is a matrix whose columns are the features constructed from $u$. The task then is to solve $u_t = \Theta(u)\xi$ where $\xi$ is a sparse vector of coefficients. Figure 5.1 shows an example of the matrix equation one might form where $u$ depends on only one spatial variable.
+\par Using a square grid of dimension $256 \times 256$ on the interval $[-25\pi,25\pi]^2$, we integrate Swift-Hohenberg from $t=0$ to $t=100$ using time step $h = .5$. Thus, we obtain a dataset of dimension $256 \times 256 \times 201$. We used backward finite differences to compute $200$ time derivatives $u_t(x_i,y_j,t_k)$. We then form various features out of the data $u(x_i,y_j,t_k)$. These features can be any term we suspect might be in the PDE, and primarily consists of polynomial functions, trigonometric functions, and spatial derivatives of $u$. We then form the matrix equation $u_t = \Theta(u)\xi$, where $\Theta$ is a matrix whose columns are the features constructed from $u$. The task then is to solve $u_t = \Theta(u)\xi$ where $\xi$ is a sparse vector of coefficients. Figure 5.1 shows an example of the matrix equation one might form where $u$ depends on only one spatial variable.
 \begin{figure}
 \centering
 \includegraphics[scale=0.5]{pde_sindy_lib.png}
