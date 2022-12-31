@@ -7,8 +7,7 @@ Rayleigh-Benard convection can be observed by trapping a thin layer of fluid bet
 In an infinite domain, for a range of wave numbers (roll width), straight roll solutions are stable. In experiments however, where the fluid is confined to a finite region, we see the stripe patterns emerge with different orientations at different locations, and eventually collide with one another, forming a mosaic of patches of stripes with defects.
 
 Many PDEs have solutions which exhibit such patterns, however we will take as our preferred PDE to be the Swift Hohenberg equation: $u_t = -(1+\Delta)^2u + Ru - u^3$.
-The CN equation may be derived from Swift-Hohenberg, by analyzing the local phase of the pattern, and introducing slow and fast time scales. The idea is that
-the phase changes slowly over most of the convecting cell, however the phase changes quickly near defects. The CN equation takes the form: $\tau(k^2)\Theta_T + \nabla \cdot \vec{k}B(k^2)+\epsilon^2 \eta \nabla^4 \Theta = 0$.
+The CN equation may be derived from an energy functional defining a microscopic gradient system that is translationally and rotationally invariant. The derivation uses a modulational ansatz in terms of amplitude and phase, which is then substitiuted into the energy and averaged over the phase. The variations of this averaged energy comprise the CN equation: $\tau(k^2)\Theta_T + \nabla \cdot \vec{k}B(k^2)+\epsilon^2 \eta \nabla^4 \Theta = 0$.
 
 The CN equation is limited in its ability to predict defects. Thus, we seek a modification of it, perhaps in the form of an additional term, which is capable of capturing more defects.
 
